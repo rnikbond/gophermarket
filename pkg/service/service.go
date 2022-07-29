@@ -1,13 +1,16 @@
 package service
 
 import (
+	market "gophermarket/pkg"
 	"gophermarket/pkg/repository"
 )
 
 type Authorization interface {
+	Login(user market.User) error
 }
 
 type Registration interface {
+	CreateUser(user market.User) error
 }
 
 type Service struct {
@@ -15,7 +18,9 @@ type Service struct {
 	Registration
 }
 
-func NewService(repos *repository.Repository) *Service {
+func NewService(repo *repository.Repository) *Service {
 
-	return &Service{}
+	return &Service{
+		Registration: NewRegisterService(repo),
+	}
 }

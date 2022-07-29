@@ -9,31 +9,44 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
+
 	"gophermarket/config"
-	gophermarket "gophermarket/pkg"
+	market "gophermarket/pkg"
 	"gophermarket/pkg/handler"
 	"gophermarket/pkg/repository"
 	"gophermarket/pkg/service"
 )
 
+func init() {
+
+	logrus.SetFormatter(new(logrus.JSONFormatter))
+}
+
 func main() {
 
 	cfg := config.NewConfig()
 	if err := cfg.ParseFlags(); err != nil {
-		log.Fatalf("error read argv: %v\n", err)
+		logrus.Fatalf("error read argv: %v\n", err)
 	}
 
 	log.Println(cfg)
 
-	repos := repository.NewRepository()
+	db, err := repository.NewPostgresDB(cfg.DatabaseURI)
+	if err != nil {
+		logrus.Fatalf("error database connection: %v\n", err)
+	}
+
+	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
-	srv := new(gophermarket.Server)
+	srv := new(market.Server)
 
 	go func() {
 		if err := srv.Run(":8080", handlers.InitRoutes()); err != nil {
 			if err != http.ErrServerClosed {
-				log.Fatalf("error occured while running http server: %v\n", err)
+				logrus.Fatalf("error occured while running http server: %v\n", err)
 			}
 		}
 	}()
@@ -47,9 +60,13 @@ func main() {
 		cancel()
 	}()
 
+	if err := db.Close(); err != nil {
+		logrus.Fatalf("error close database connection:%+v", err)
+	}
+
 	if err := srv.Shutdown(ctx); err != nil {
 		if err != http.ErrServerClosed {
-			log.Fatalf("Server Shutdown Failed:%+v", err)
+			logrus.Fatalf("Server Shutdown Failed:%+v", err)
 		}
 	}
 }
