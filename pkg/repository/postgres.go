@@ -1,13 +1,7 @@
 package repository
 
 import (
-	"fmt"
-
 	"github.com/jmoiron/sqlx"
-)
-
-const (
-	usersTable = "users"
 )
 
 func NewPostgresDB(dsn string) (*sqlx.DB, error) {
@@ -30,10 +24,10 @@ func NewPostgresDB(dsn string) (*sqlx.DB, error) {
 
 func createTables(db *sqlx.DB) error {
 
-	query := fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s (
-                            id SERIAL PRIMARY KEY,
-		                    username CHARACTER VARYING(50),
-		                    password_hash CHARACTER VARYING(100));`, usersTable)
+	query := `CREATE TABLE IF NOT EXISTS users (
+                           id SERIAL PRIMARY KEY,
+		             username CHARACTER VARYING(50),
+		        password_hash CHARACTER VARYING(64) );`
 
 	_, err := db.Exec(query)
 	return err

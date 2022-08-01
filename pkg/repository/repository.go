@@ -7,22 +7,17 @@ import (
 )
 
 type Authorization interface {
-	Login(user market.User) error
-}
-
-type Registration interface {
-	CreateUser(user market.User) error
+	SignIn(user market.User) error
+	SignUp(user market.User) error
 }
 
 type Repository struct {
 	Authorization
-	Registration
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 
 	return &Repository{
-		Authorization: NewLoginService(db),
-		Registration:  NewRegisterPostgres(db),
+		Authorization: NewAuthPostgres(db),
 	}
 }

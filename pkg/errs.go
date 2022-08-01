@@ -20,6 +20,11 @@ func (es ErrGM) Error() string {
 var (
 	ErrEmptyLoginPassword = NewErr("login or password can no been empty")
 	ErrUserAlreadyExists  = NewErr("login already registered")
+	ErrUserNotFound       = NewErr("user not found")
+)
+
+var (
+	ErrGenerateToken = NewErr("internal error generate token")
 )
 
 // ErrorHTTP - Преобразование ошибки Storage в HTTP код
@@ -37,6 +42,9 @@ func ErrorHTTP(err error) int {
 
 	case ErrEmptyLoginPassword:
 		return http.StatusBadRequest
+
+	case ErrUserNotFound:
+		return http.StatusUnauthorized
 
 	default:
 		return http.StatusInternalServerError

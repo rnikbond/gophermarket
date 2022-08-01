@@ -6,21 +6,17 @@ import (
 )
 
 type Authorization interface {
-	Login(user market.User) error
-}
-
-type Registration interface {
-	CreateUser(user market.User) error
+	SignUp(user market.User) (string, error)
+	SignIn(user market.User) (string, error)
 }
 
 type Service struct {
 	Authorization
-	Registration
 }
 
 func NewService(repo *repository.Repository) *Service {
 
 	return &Service{
-		Registration: NewRegisterService(repo),
+		Authorization: NewAuthService(repo),
 	}
 }
