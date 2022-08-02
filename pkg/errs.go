@@ -18,9 +18,9 @@ func (es ErrGM) Error() string {
 }
 
 var (
-	ErrEmptyLoginPassword = NewErr("login or password can no been empty")
-	ErrUserAlreadyExists  = NewErr("login already registered")
-	ErrUserNotFound       = NewErr("user not found")
+	ErrEmptyAuthData     = NewErr("empty login or password")
+	ErrUserAlreadyExists = NewErr("login already registered")
+	ErrUserNotFound      = NewErr("user not found")
 )
 
 var (
@@ -40,7 +40,7 @@ func ErrorHTTP(err error) int {
 	case ErrUserAlreadyExists:
 		return http.StatusConflict
 
-	case ErrEmptyLoginPassword:
+	case ErrEmptyAuthData:
 		return http.StatusBadRequest
 
 	case ErrUserNotFound:

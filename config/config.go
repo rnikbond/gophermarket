@@ -1,7 +1,6 @@
 package config
 
 import (
-	"bytes"
 	"errors"
 	"flag"
 	"fmt"
@@ -9,7 +8,6 @@ import (
 	"net"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/caarlos0/env"
 )
@@ -31,18 +29,12 @@ func NewConfig() Config {
 
 func (cfg Config) String() string {
 
-	var buf bytes.Buffer
-	w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', tabwriter.AlignRight)
+	s := "\n"
+	s += fmt.Sprintf("RUN_ADDRESS: %s\n", cfg.Address)
+	s += fmt.Sprintf("DATABASE_URI: %s\n", cfg.DatabaseURI)
+	s += fmt.Sprintf("ACCRUAL_SYSTEM_ADDRESS: %s\n", cfg.AccrualAddress)
 
-	fmt.Fprintln(w, "\nRUN_ADDRESS\t", cfg.Address)
-	fmt.Fprintln(w, "DATABASE_URI\t", cfg.DatabaseURI)
-	fmt.Fprintln(w, "ACCRUAL_SYSTEM_ADDRESS\t", cfg.AccrualAddress)
-
-	if err := w.Flush(); err != nil {
-		return err.Error()
-	}
-
-	return buf.String()
+	return s
 }
 
 // ReadEnvVars - Чтение переменных среды

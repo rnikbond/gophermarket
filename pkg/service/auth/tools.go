@@ -1,4 +1,4 @@
-package service
+package auth
 
 import (
 	"crypto/sha256"
@@ -20,7 +20,7 @@ type TokenJWT struct {
 	jwt.StandardClaims
 }
 
-func verifyJWT(bearerToken string, user market.User) (*jwt.Token, error) {
+func VerifyJWT(bearerToken string, user market.User) (*jwt.Token, error) {
 
 	token, err := jwt.ParseWithClaims(bearerToken, &TokenJWT{}, func(token *jwt.Token) (interface{}, error) {
 		return user.Password, nil
@@ -29,7 +29,7 @@ func verifyJWT(bearerToken string, user market.User) (*jwt.Token, error) {
 	return token, err
 }
 
-func (s AuthService) generateJWT(user market.User) string {
+func GenerateJWT(user market.User) string {
 
 	var tokenClaim = TokenJWT{
 		Username: user.Username,
@@ -47,8 +47,13 @@ func (s AuthService) generateJWT(user market.User) string {
 	return tokenString
 }
 
-func (s AuthService) generatePasswordHash(user market.User) string {
+func GeneratePasswordHash(password string) (string, error) {
+
+	if len(password) < 1 {
+		return "", market.ErrEmptyAuthData
+	}
+
 	hash := sha256.New()
-	hash.Write([]byte(user.Password + pwdSalt))
-	return hex.EncodeToString(hash.Sum(nil))
+	hash.Write([]byte(password))
+	return hex.EncodeToString(hash.Sum(nil)), nil
 }

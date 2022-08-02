@@ -1,10 +1,38 @@
-package repository
+package postgres
 
 import (
+	"gophermarket/pkg/repository"
+
 	"github.com/jmoiron/sqlx"
 )
 
-func NewPostgresDB(dsn string) (*sqlx.DB, error) {
+type Postgres struct {
+	db *sqlx.DB
+}
+
+func (pg *Postgres) Finish() error {
+	return pg.db.Close()
+}
+
+func NewPostgresRepository(dsn string) (repository.Repository, error) {
+
+	db, err := pgDriver(dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := createTables(db); err != nil {
+		return nil, err
+	}
+
+	pg := Postgres{
+		db: db,
+	}
+
+	return &pg, nil
+}
+
+func pgDriver(dsn string) (*sqlx.DB, error) {
 
 	db, err := sqlx.Open("postgres", dsn)
 	if err != nil {

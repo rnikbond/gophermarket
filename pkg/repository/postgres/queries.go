@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 const (
 	queryGetUser   = "SELECT username, password_hash FROM users WHERE username = $1"

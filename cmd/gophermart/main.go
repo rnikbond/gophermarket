@@ -9,13 +9,14 @@ import (
 	"syscall"
 	"time"
 
+	"gophermarket/pkg/repository/postgres"
+
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 
 	"gophermarket/config"
 	market "gophermarket/pkg"
 	"gophermarket/pkg/handler"
-	"gophermarket/pkg/repository"
 	"gophermarket/pkg/service"
 )
 
@@ -33,13 +34,12 @@ func main() {
 
 	log.Println(cfg)
 
-	db, err := repository.NewPostgresDB(cfg.DatabaseURI)
-	if err != nil {
-		logrus.Fatalf("error database connection: %v\n", err)
+	pgStorage, errDB := postgres.NewPostgresRepository(cfg.DatabaseURI)
+	if errDB != nil {
+		logrus.Fatalf("error create database storage: %v\n", errDB)
 	}
 
-	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
+	services := service.NewService(pgStorage)
 	handlers := handler.NewHandler(services)
 	srv := new(market.Server)
 
@@ -60,7 +60,7 @@ func main() {
 		cancel()
 	}()
 
-	if err := db.Close(); err != nil {
+	if err := pgStorage.Finish(); err != nil {
 		logrus.Fatalf("error close database connection:%+v", err)
 	}
 

@@ -1,23 +1,13 @@
+//go:generate mockgen -source repository.go -destination ../../mocks/pkg/repository/repository.go -package mock_repository
 package repository
 
 import (
 	market "gophermarket/pkg"
-
-	"github.com/jmoiron/sqlx"
 )
 
-type Authorization interface {
-	SignIn(user market.User) error
+type Repository interface {
 	SignUp(user market.User) error
-}
+	SignIn(user market.User) error
 
-type Repository struct {
-	Authorization
-}
-
-func NewRepository(db *sqlx.DB) *Repository {
-
-	return &Repository{
-		Authorization: NewAuthPostgres(db),
-	}
+	Finish() error
 }
