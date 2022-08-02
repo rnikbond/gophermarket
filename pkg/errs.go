@@ -18,9 +18,11 @@ func (es ErrGM) Error() string {
 }
 
 var (
-	ErrEmptyAuthData     = NewErr("empty login or password")
-	ErrUserAlreadyExists = NewErr("login already registered")
-	ErrUserNotFound      = NewErr("user not found")
+	ErrEmptyAuthData      = NewErr("empty login or password")
+	ErrUserAlreadyExists  = NewErr("login already registered")
+	ErrUserNotFound       = NewErr("user not found")
+	ErrInvalidOrderNumber = NewErr("invalid order number")
+	ErrOrderAlreadyExists = NewErr("order number already exists")
 )
 
 var (
@@ -45,6 +47,12 @@ func ErrorHTTP(err error) int {
 
 	case ErrUserNotFound:
 		return http.StatusUnauthorized
+
+	case ErrInvalidOrderNumber:
+		return http.StatusUnprocessableEntity
+
+	case ErrOrderAlreadyExists:
+		return http.StatusConflict
 
 	default:
 		return http.StatusInternalServerError

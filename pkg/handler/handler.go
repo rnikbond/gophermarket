@@ -39,6 +39,7 @@ func (h *Handler) InitRoutes() *chi.Mux {
 		r.Route("/user", func(r chi.Router) {
 			r.Post("/login", h.SignIn)
 			r.Post("/register", h.SignUp)
+			r.Post("/orders", h.CreateOrder)
 		})
 	})
 

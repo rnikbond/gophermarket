@@ -5,7 +5,7 @@ import (
 	"gophermarket/pkg/repository"
 )
 
-type Authorization interface {
+type IAuthorization interface {
 	SignUp(user market.User) (string, error)
 	SignIn(user market.User) (string, error)
 
@@ -13,10 +13,10 @@ type Authorization interface {
 }
 
 type Auth struct {
-	repo repository.Repository
+	repo repository.IRepository
 }
 
-func NewService(repo repository.Repository) *Auth {
+func NewService(repo repository.IRepository) *Auth {
 	return &Auth{repo: repo}
 }
 

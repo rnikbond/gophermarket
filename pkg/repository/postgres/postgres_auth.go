@@ -6,11 +6,10 @@ import (
 
 func (pg Postgres) SignUp(user market.User) error {
 
-	row := pg.db.QueryRow(queryGetUser, user.Username)
+	row := pg.db.QueryRow(queryCheckUsername, user.Username)
 
-	var userDB market.User
-
-	if err := row.Scan(&userDB.Username, &userDB.Password); err == nil {
+	var userID int64
+	if err := row.Scan(&userID); err == nil {
 		return market.ErrUserAlreadyExists
 	}
 
@@ -22,14 +21,10 @@ func (pg Postgres) SignUp(user market.User) error {
 
 func (pg Postgres) SignIn(user market.User) error {
 
-	row := pg.db.QueryRow(queryGetUser, user.Username)
-	var userDB market.User
+	row := pg.db.QueryRow(queryCheckUserAuth, user.Username, user.Password)
 
-	if err := row.Scan(&userDB.Username, &userDB.Password); err != nil {
-		return market.ErrUserNotFound
-	}
-
-	if user.Username != userDB.Username || user.Password != userDB.Password {
+	var userID int64
+	if err := row.Scan(&userID); err != nil {
 		return market.ErrUserNotFound
 	}
 
