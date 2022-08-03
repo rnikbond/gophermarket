@@ -28,7 +28,6 @@ var (
 
 var (
 	ErrGenerateToken = NewErr("internal error generate token")
-	ErrCheckOrder    = NewErr("error checking order number")
 )
 
 // ErrorHTTP - Преобразование ошибки Storage в HTTP код
@@ -41,23 +40,19 @@ func ErrorHTTP(err error) int {
 
 	switch serviceErr {
 
-	case ErrUserAlreadyExists:
+	case ErrUserAlreadyExists,
+		ErrOrderAlreadyExists:
 		return http.StatusConflict
 
 	case ErrEmptyAuthData:
 		return http.StatusBadRequest
 
-	case ErrUserNotFound:
+	case ErrUserNotFound,
+		ErrUserUnauthorized:
 		return http.StatusUnauthorized
 
 	case ErrInvalidOrderNumber:
 		return http.StatusUnprocessableEntity
-
-	case ErrOrderAlreadyExists:
-		return http.StatusConflict
-
-	case ErrUserUnauthorized:
-		return http.StatusUnauthorized
 
 	default:
 		return http.StatusInternalServerError

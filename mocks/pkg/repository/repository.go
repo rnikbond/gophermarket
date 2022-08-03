@@ -34,6 +34,20 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
+// CreateOrder mocks base method.
+func (m *MockRepository) CreateOrder(number int64, username string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateOrder", number, username)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateOrder indicates an expected call of CreateOrder.
+func (mr *MockRepositoryMockRecorder) CreateOrder(number, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrder", reflect.TypeOf((*MockRepository)(nil).CreateOrder), number, username)
+}
+
 // Finish mocks base method.
 func (m *MockRepository) Finish() error {
 	m.ctrl.T.Helper()
