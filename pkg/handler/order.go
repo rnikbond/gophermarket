@@ -46,4 +46,6 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), market.ErrorHTTP(err))
 		return
 	}
+
+	w.WriteHeader(http.StatusAccepted)
 }
