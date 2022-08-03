@@ -5,25 +5,25 @@ import (
 	"gophermarket/pkg/repository"
 )
 
-type IOrder interface {
-	Create(number int64) error
+type ServiceOrder interface {
+	Create(number int64, username string) error
 }
 
 type Order struct {
-	repo repository.IRepository
+	repo repository.Repository
 }
 
-func NewService(repo repository.IRepository) *Order {
+func NewService(repo repository.Repository) ServiceOrder {
 	return &Order{
 		repo: repo,
 	}
 }
 
-func (or Order) Create(number int64) error {
+func (or Order) Create(number int64, username string) error {
 
 	if !ValidOrder(number) {
 		return market.ErrInvalidOrderNumber
 	}
 
-	return nil
+	return or.repo.CreateOrder(number, username)
 }

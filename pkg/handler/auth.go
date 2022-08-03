@@ -30,7 +30,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, errToken := h.services.IAuthorization.SignIn(user)
+	token, errToken := h.services.Auth.SignIn(user)
 	if errToken != nil {
 		http.Error(w, errToken.Error(), market.ErrorHTTP(errToken))
 		return
@@ -62,7 +62,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, errToken := h.services.IAuthorization.SignUp(user)
+	token, errToken := h.services.Auth.SignUp(user)
 	if errToken != nil {
 		http.Error(w, errToken.Error(), market.ErrorHTTP(errToken))
 		return

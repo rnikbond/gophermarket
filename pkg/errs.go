@@ -23,10 +23,12 @@ var (
 	ErrUserNotFound       = NewErr("user not found")
 	ErrInvalidOrderNumber = NewErr("invalid order number")
 	ErrOrderAlreadyExists = NewErr("order number already exists")
+	ErrUserUnauthorized   = NewErr("user not authorized")
 )
 
 var (
 	ErrGenerateToken = NewErr("internal error generate token")
+	ErrCheckOrder    = NewErr("error checking order number")
 )
 
 // ErrorHTTP - Преобразование ошибки Storage в HTTP код
@@ -53,6 +55,9 @@ func ErrorHTTP(err error) int {
 
 	case ErrOrderAlreadyExists:
 		return http.StatusConflict
+
+	case ErrUserUnauthorized:
+		return http.StatusUnauthorized
 
 	default:
 		return http.StatusInternalServerError

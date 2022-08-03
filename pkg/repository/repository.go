@@ -5,11 +5,11 @@ import (
 	market "gophermarket/pkg"
 )
 
-type IRepository interface {
+type Repository interface {
 	SignUp(user market.User) error
 	SignIn(user market.User) error
 
-	CreateOrder(number int64) error
+	CreateOrder(number int64, username string) error
 
 	Finish() error
 }

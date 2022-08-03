@@ -7,14 +7,14 @@ import (
 )
 
 type Service struct {
-	auth.IAuthorization
-	order.IOrder
+	Auth  auth.ServiceAuth
+	Order order.ServiceOrder
 }
 
-func NewService(repo repository.IRepository) *Service {
+func NewService(repo repository.Repository) *Service {
 
 	return &Service{
-		IAuthorization: auth.NewService(repo),
-		IOrder:         order.NewService(repo),
+		Auth:  auth.NewService(repo),
+		Order: order.NewService(repo),
 	}
 }

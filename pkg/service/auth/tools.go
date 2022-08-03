@@ -3,7 +3,9 @@ package auth
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	market "gophermarket/pkg"
@@ -20,10 +22,37 @@ type TokenJWT struct {
 	jwt.StandardClaims
 }
 
-func VerifyJWT(bearerToken string, user market.User) (*jwt.Token, error) {
+func ParseCookie(r *http.Request) (string, error) {
+
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		fmt.Println("cookie not exists")
+		return ``, market.ErrEmptyAuthData
+	}
+
+	bearerToken := cookie.Value
+	token, err := VerifyJWT(bearerToken)
+
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			return ``, market.ErrUserUnauthorized
+		}
+
+		return ``, market.ErrEmptyAuthData
+	}
+
+	if !token.Valid {
+		return ``, market.ErrUserUnauthorized
+	}
+
+	user := token.Claims.(*TokenJWT)
+	return user.Username, nil
+}
+
+func VerifyJWT(bearerToken string) (*jwt.Token, error) {
 
 	token, err := jwt.ParseWithClaims(bearerToken, &TokenJWT{}, func(token *jwt.Token) (interface{}, error) {
-		return user.Password, nil
+		return []byte(secretKey), nil
 	})
 
 	return token, err

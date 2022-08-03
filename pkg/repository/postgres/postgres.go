@@ -14,7 +14,7 @@ func (pg *Postgres) Finish() error {
 	return pg.db.Close()
 }
 
-func NewPostgresRepository(dsn string) (repository.IRepository, error) {
+func NewPostgresRepository(dsn string) (repository.Repository, error) {
 
 	db, err := pgDriver(dsn)
 	if err != nil {
@@ -47,8 +47,6 @@ func pgDriver(dsn string) (*sqlx.DB, error) {
 		return nil, err
 	}
 
-	initTables(db)
-
 	return db, nil
 }
 
@@ -61,15 +59,11 @@ func createTables(db *sqlx.DB) error {
          password_hash CHARACTER VARYING(64)
          );`,
 
-		`CREATE TABLE IF NOT EXISTS statuses (
-             id SERIAL PRIMARY KEY,
-         status CHARACTER VARYING(30) UNIQUE
-         );`,
-
 		`CREATE TABLE IF NOT EXISTS orders (
                  id SERIAL PRIMARY KEY,
             user_id INTEGER REFERENCES users (id),
-          status_id INTEGER REFERENCES statuses(id),
+             number BIGINT UNIQUE,
+             status CHARACTER VARYING(50),
          created_at TIMESTAMP
          );`,
 	}
@@ -81,21 +75,4 @@ func createTables(db *sqlx.DB) error {
 	}
 
 	return nil
-}
-
-func initTables(db *sqlx.DB) {
-
-	statuses := []string{
-		"NEW",
-		"PROCESSING",
-		"INVALID",
-		"PROCESSED",
-	}
-
-	query := "INSERT INTO statuses(status) VALUES ($1);"
-	for _, status := range statuses {
-		if _, err := db.Exec(query, status); err != nil {
-			continue
-		}
-	}
 }
