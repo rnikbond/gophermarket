@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	market "gophermarket/pkg"
+	market "gophermarket/internal"
+	"gophermarket/pkg"
 
 	"github.com/sirupsen/logrus"
 )
@@ -30,14 +31,14 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, errToken := h.services.Auth.SignIn(user)
-	if errToken != nil {
-		http.Error(w, errToken.Error(), market.ErrorHTTP(errToken))
+	errSignIn := h.services.Auth.SignIn(user)
+	if errSignIn != nil {
+		http.Error(w, errSignIn.Error(), pkg.ErrorHTTP(errSignIn))
 		return
 	}
 
-	if err := SetCookie(&w, token); err != nil {
-		http.Error(w, err.Error(), market.ErrorHTTP(err))
+	if err := saveAuth(&w, h.GenerateJWT(user)); err != nil {
+		http.Error(w, err.Error(), pkg.ErrorHTTP(err))
 		return
 	}
 }
@@ -62,14 +63,14 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, errToken := h.services.Auth.SignUp(user)
-	if errToken != nil {
-		http.Error(w, errToken.Error(), market.ErrorHTTP(errToken))
+	errSignUp := h.services.Auth.SignUp(user)
+	if errSignUp != nil {
+		http.Error(w, errSignUp.Error(), pkg.ErrorHTTP(errSignUp))
 		return
 	}
 
-	if err := SetCookie(&w, token); err != nil {
-		http.Error(w, err.Error(), market.ErrorHTTP(err))
+	if err := saveAuth(&w, h.GenerateJWT(user)); err != nil {
+		http.Error(w, err.Error(), pkg.ErrorHTTP(err))
 		return
 	}
 }

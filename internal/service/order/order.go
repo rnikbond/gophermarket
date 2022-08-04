@@ -1,8 +1,8 @@
 package order
 
 import (
+	"gophermarket/internal/repository"
 	market "gophermarket/pkg"
-	"gophermarket/pkg/repository"
 )
 
 type ServiceOrder interface {
@@ -10,10 +10,10 @@ type ServiceOrder interface {
 }
 
 type Order struct {
-	repo repository.Repository
+	repo *repository.Repository
 }
 
-func NewService(repo repository.Repository) ServiceOrder {
+func NewService(repo *repository.Repository) ServiceOrder {
 	return &Order{
 		repo: repo,
 	}
@@ -25,5 +25,5 @@ func (or Order) Create(number int64, username string) error {
 		return market.ErrInvalidOrderNumber
 	}
 
-	return or.repo.CreateOrder(number, username)
+	return or.repo.Order.Create(number, username)
 }

@@ -1,4 +1,4 @@
-package config
+package pkg
 
 import (
 	"errors"
@@ -16,6 +16,8 @@ type Config struct {
 	Address        string `env:"RUN_ADDRESS "`
 	DatabaseURI    string `env:"DATABASE_URI"`
 	AccrualAddress string `env:"ACCRUAL_SYSTEM_ADDRESS"`
+	TokenKey       string `env:"TOKEN_KEY"`
+	PasswordSalt   string `env:"PASSWORD_SALT"`
 }
 
 func NewConfig() Config {
@@ -30,9 +32,11 @@ func NewConfig() Config {
 func (cfg Config) String() string {
 
 	s := "\n"
-	s += fmt.Sprintf("RUN_ADDRESS: %s\n", cfg.Address)
-	s += fmt.Sprintf("DATABASE_URI: %s\n", cfg.DatabaseURI)
-	s += fmt.Sprintf("ACCRUAL_SYSTEM_ADDRESS: %s\n", cfg.AccrualAddress)
+	s += fmt.Sprintf("\tRUN_ADDRESS: %s\n", cfg.Address)
+	s += fmt.Sprintf("\tDATABASE_URI: %s\n", cfg.DatabaseURI)
+	s += fmt.Sprintf("\tACCRUAL_SYSTEM_ADDRESS: %s\n", cfg.AccrualAddress)
+	s += fmt.Sprintf("\tTOKEN_KEY: %s\n", cfg.TokenKey)
+	s += fmt.Sprintf("\tPASSWORD_SALT: %s\n", cfg.PasswordSalt)
 
 	return s
 }
@@ -54,6 +58,9 @@ func (cfg *Config) ParseFlags() error {
 
 	flag.StringVar(&cfg.AccrualAddress, "r", cfg.AccrualAddress, "string - accrual address")
 	flag.StringVar(&cfg.DatabaseURI, "d", cfg.DatabaseURI, "string - database DSN")
+	flag.StringVar(&cfg.TokenKey, "t", "secretKeyJWT", "string - secret key JWT")
+	flag.StringVar(&cfg.PasswordSalt, "s", "salt-salt-salt", "string - password salt")
+
 	addr := flag.String("a", cfg.Address, "string - host:port")
 	flag.Parse()
 

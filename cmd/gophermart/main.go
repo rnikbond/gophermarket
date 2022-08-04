@@ -9,15 +9,16 @@ import (
 	"syscall"
 	"time"
 
-	"gophermarket/pkg/repository/postgres"
+	"gophermarket/internal/repository/postgres"
+	"gophermarket/internal/service"
+	"gophermarket/pkg"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 
-	"gophermarket/config"
-	market "gophermarket/pkg"
-	"gophermarket/pkg/handler"
-	"gophermarket/pkg/service"
+	market "gophermarket/internal"
+	"gophermarket/internal/handler"
 )
 
 func init() {
@@ -25,22 +26,41 @@ func init() {
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 }
 
+func pgDriver(dsn string) (*sqlx.DB, error) {
+
+	db, err := sqlx.Open("postgres", dsn)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := db.Ping(); err != nil {
+		return nil, err
+	}
+
+	return db, nil
+}
+
 func main() {
 
-	cfg := config.NewConfig()
+	cfg := pkg.NewConfig()
 	if err := cfg.ParseFlags(); err != nil {
 		logrus.Fatalf("error read argv: %v\n", err)
 	}
 
 	log.Println(cfg)
 
-	pgStorage, errDB := postgres.NewPostgresRepository(cfg.DatabaseURI)
+	db, errDB := pgDriver(cfg.DatabaseURI)
 	if errDB != nil {
-		logrus.Fatalf("error create database storage: %v\n", errDB)
+		logrus.Fatalf("error create connection to database: %v\n", errDB)
 	}
 
-	services := service.NewService(pgStorage)
-	handlers := handler.NewHandler(services)
+	pgRepo, errRepo := postgres.NewPostgresRepository(db)
+	if errRepo != nil {
+		logrus.Fatalf("error create postgres repository: %v\n", errRepo)
+	}
+
+	services := service.NewServices(pgRepo, cfg.PasswordSalt)
+	handlers := handler.NewHandler(services, cfg.TokenKey)
 	srv := new(market.Server)
 
 	go func() {
@@ -60,7 +80,7 @@ func main() {
 		cancel()
 	}()
 
-	if err := pgStorage.Finish(); err != nil {
+	if err := db.Close(); err != nil {
 		logrus.Fatalf("error close database connection:%+v", err)
 	}
 

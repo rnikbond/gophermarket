@@ -1,4 +1,4 @@
-package gophermarket
+package pkg
 
 import (
 	"errors"
@@ -18,12 +18,14 @@ func (es ErrGM) Error() string {
 }
 
 var (
-	ErrEmptyAuthData      = NewErr("empty login or password")
-	ErrUserAlreadyExists  = NewErr("login already registered")
-	ErrUserNotFound       = NewErr("user not found")
-	ErrInvalidOrderNumber = NewErr("invalid order number")
-	ErrOrderAlreadyExists = NewErr("order number already exists")
-	ErrUserUnauthorized   = NewErr("user not authorized")
+	ErrEmptyAuthData     = NewErr("empty login or password")
+	ErrUserAlreadyExists = NewErr("login already registered")
+	ErrUserNotFound      = NewErr("user not found")
+	ErrUserUnauthorized  = NewErr("user not authorized")
+
+	ErrInvalidOrderNumber   = NewErr("invalid order number")
+	ErrOrderAlreadyExists   = NewErr("order number already exists")
+	ErrUserAlreadyOrderedIt = NewErr("user already ordered this order")
 )
 
 var (
@@ -53,6 +55,9 @@ func ErrorHTTP(err error) int {
 
 	case ErrInvalidOrderNumber:
 		return http.StatusUnprocessableEntity
+
+	case ErrUserAlreadyOrderedIt:
+		return http.StatusOK
 
 	default:
 		return http.StatusInternalServerError

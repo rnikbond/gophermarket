@@ -6,21 +6,15 @@ import (
 	"strconv"
 
 	market "gophermarket/pkg"
-	"gophermarket/pkg/service/auth"
 
 	"github.com/sirupsen/logrus"
 )
 
 func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
-	if r.Header.Get("Content-Type") != "text/plain" {
-		w.WriteHeader(http.StatusUnsupportedMediaType)
-		return
-	}
-
-	username, err := auth.ParseCookie(r)
-	if err != nil {
-		http.Error(w, err.Error(), market.ErrorHTTP(err))
+	username, _, ok := r.BasicAuth()
+	if !ok {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
@@ -36,16 +30,20 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	number, err := strconv.ParseInt(string(data), 10, 64)
+	order, err := strconv.ParseInt(string(data), 10, 64)
 	if err != nil {
 		http.Error(w, "invalid order number", http.StatusBadRequest)
 		return
 	}
 
-	if err := h.services.Order.Create(number, username); err != nil {
-		http.Error(w, err.Error(), market.ErrorHTTP(err))
+	errOrder := h.services.Order.Create(order, username)
+	if errOrder == nil {
+		w.WriteHeader(http.StatusAccepted)
 		return
 	}
 
-	w.WriteHeader(http.StatusAccepted)
+	if errOrder != market.ErrUserAlreadyOrderedIt {
+		http.Error(w, errOrder.Error(), market.ErrorHTTP(errOrder))
+		return
+	}
 }
