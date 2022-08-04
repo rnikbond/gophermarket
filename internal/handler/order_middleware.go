@@ -31,7 +31,7 @@ func (h *Handler) Username(r *http.Request) (string, error) {
 	cookie, err := r.Cookie("token")
 	if err != nil {
 		fmt.Println("cookie not exists")
-		return ``, pkg.ErrEmptyAuthData
+		return ``, pkg.ErrUserUnauthorized
 	}
 
 	bearerToken := cookie.Value
