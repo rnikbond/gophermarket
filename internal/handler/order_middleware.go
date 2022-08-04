@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"gophermarket/pkg"
@@ -15,32 +14,22 @@ func (h *Handler) VerifyUser(next http.Handler) http.Handler {
 			return
 		}
 
-		username, err := h.Username(r)
-		if err != nil {
-			http.Error(w, err.Error(), pkg.ErrorHTTP(err))
+		cookie, errCookie := r.Cookie("token")
+		if errCookie != nil {
+			http.Error(w, pkg.ErrUserUnauthorized.Error(), pkg.ErrorHTTP(pkg.ErrUserUnauthorized))
 			return
 		}
 
-		r.SetBasicAuth(username, "")
+		bearerToken := cookie.Value
+		token, errJWT := h.VerifyJWT(bearerToken)
+		if errJWT != nil || !token.Valid {
+			http.Error(w, pkg.ErrUserUnauthorized.Error(), pkg.ErrorHTTP(pkg.ErrUserUnauthorized))
+			return
+		}
+
+		user := token.Claims.(*Token)
+
+		r.SetBasicAuth(user.Username, "")
 		next.ServeHTTP(w, r)
 	})
-}
-
-func (h *Handler) Username(r *http.Request) (string, error) {
-
-	cookie, err := r.Cookie("token")
-	if err != nil {
-		fmt.Println("cookie not exists")
-		return ``, pkg.ErrUserUnauthorized
-	}
-
-	bearerToken := cookie.Value
-	token, err := h.VerifyJWT(bearerToken)
-
-	if err != nil || !token.Valid {
-		return ``, pkg.ErrUserUnauthorized
-	}
-
-	user := token.Claims.(*Token)
-	return user.Username, nil
 }
