@@ -5,8 +5,6 @@ import (
 	"net/http"
 
 	"gophermarket/pkg"
-
-	"github.com/dgrijalva/jwt-go"
 )
 
 func (h *Handler) VerifyUser(next http.Handler) http.Handler {
@@ -39,15 +37,7 @@ func (h *Handler) Username(r *http.Request) (string, error) {
 	bearerToken := cookie.Value
 	token, err := h.VerifyJWT(bearerToken)
 
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			return ``, pkg.ErrUserUnauthorized
-		}
-
-		return ``, pkg.ErrEmptyAuthData
-	}
-
-	if !token.Valid {
+	if err != nil || !token.Valid {
 		return ``, pkg.ErrUserUnauthorized
 	}
 

@@ -56,7 +56,7 @@ func (s Auth) SignIn(user market.User) error {
 
 	user.Password = hash
 
-	if _, err := s.repo.Authorization.Id(user); err != nil {
+	if _, err := s.repo.Authorization.ID(user); err != nil {
 		return err
 	}
 

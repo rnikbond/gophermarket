@@ -7,7 +7,7 @@ import (
 
 type Authorization interface {
 	Create(user market.User) error
-	Id(user market.User) (int64, error)
+	ID(user market.User) (int64, error)
 }
 
 type Order interface {

@@ -31,8 +31,8 @@ func (pg Authorization) Create(user market.User) error {
 	return nil
 }
 
-// Id Получение идентификатора пользователя
-func (pg Authorization) Id(user market.User) (int64, error) {
+// ID Получение идентификатора пользователя
+func (pg Authorization) ID(user market.User) (int64, error) {
 	row := pg.db.QueryRow(queryGetUserID, user.Username, user.Password)
 
 	var userID int64
