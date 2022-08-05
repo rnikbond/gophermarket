@@ -30,7 +30,7 @@ func (s Auth) SignUp(user market.User) error {
 		return err
 	}
 
-	hash, err := s.GeneratePasswordHash(user.Password)
+	hash, err := pkg.GeneratePasswordHash(user.Password, s.passwordSalt)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (s Auth) SignIn(user market.User) error {
 		return err
 	}
 
-	hash, err := s.GeneratePasswordHash(user.Password)
+	hash, err := pkg.GeneratePasswordHash(user.Password, s.passwordSalt)
 	if err != nil {
 		return err
 	}
