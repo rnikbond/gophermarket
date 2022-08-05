@@ -31,14 +31,16 @@ func NewConfig() Config {
 
 func (cfg Config) String() string {
 
-	s := "\n"
-	s += fmt.Sprintf("\tRUN_ADDRESS: %s\n", cfg.Address)
-	s += fmt.Sprintf("\tDATABASE_URI: %s\n", cfg.DatabaseURI)
-	s += fmt.Sprintf("\tACCRUAL_SYSTEM_ADDRESS: %s\n", cfg.AccrualAddress)
-	s += fmt.Sprintf("\tTOKEN_KEY: %s\n", cfg.TokenKey)
-	s += fmt.Sprintf("\tPASSWORD_SALT: %s\n", cfg.PasswordSalt)
+	builder := strings.Builder{}
 
-	return s
+	builder.WriteString(fmt.Sprintf("\n"))
+	builder.WriteString(fmt.Sprintf("\tRUN_ADDRESS: %s\n", cfg.Address))
+	builder.WriteString(fmt.Sprintf("\tDATABASE_URI: %s\n", cfg.DatabaseURI))
+	builder.WriteString(fmt.Sprintf("\tACCRUAL_SYSTEM_ADDRESS: %s\n", cfg.AccrualAddress))
+	builder.WriteString(fmt.Sprintf("\tTOKEN_KEY: %s\n", cfg.TokenKey))
+	builder.WriteString(fmt.Sprintf("\tPASSWORD_SALT: %s\n", cfg.PasswordSalt))
+
+	return builder.String()
 }
 
 // ReadEnvVars - Чтение переменных среды

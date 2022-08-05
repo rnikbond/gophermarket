@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -20,7 +21,7 @@ import (
 	"gophermarket/internal/handler"
 )
 
-func init() {
+func configureLog() {
 
 	logrus.SetFormatter(new(logrus.JSONFormatter))
 }
@@ -41,10 +42,14 @@ func pgDriver(dsn string) (*sqlx.DB, error) {
 
 func main() {
 
+	configureLog()
+
 	cfg := pkg.NewConfig()
 	if err := cfg.ParseFlags(); err != nil {
 		logrus.Fatalf("error read argv: %v\n", err)
 	}
+
+	fmt.Println(cfg)
 
 	db, errDB := pgDriver(cfg.DatabaseURI)
 	if errDB != nil {
