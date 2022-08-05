@@ -33,7 +33,7 @@ func (cfg Config) String() string {
 
 	builder := strings.Builder{}
 
-	builder.WriteString(fmt.Sprintf("\n"))
+	builder.WriteString("\n")
 	builder.WriteString(fmt.Sprintf("\tRUN_ADDRESS: %s\n", cfg.Address))
 	builder.WriteString(fmt.Sprintf("\tDATABASE_URI: %s\n", cfg.DatabaseURI))
 	builder.WriteString(fmt.Sprintf("\tACCRUAL_SYSTEM_ADDRESS: %s\n", cfg.AccrualAddress))
