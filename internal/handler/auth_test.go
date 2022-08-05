@@ -152,9 +152,8 @@ func TestHandler_SignUp(t *testing.T) {
 			handlers.SignUp(w, request)
 
 			response := w.Result()
-			defer func() {
-				require.NoError(t, response.Body.Close())
-			}()
+			errClose := response.Body.Close()
+			assert.NoError(t, errClose)
 
 			assert.Equal(t, tt.args.wantStatus, response.StatusCode)
 		})
@@ -290,9 +289,8 @@ func TestHandler_SignIn(t *testing.T) {
 			handlers.SignIn(w, request)
 
 			response := w.Result()
-			defer func() {
-				require.NoError(t, response.Body.Close())
-			}()
+			errClose := response.Body.Close()
+			assert.NoError(t, errClose)
 
 			assert.Equal(t, tt.args.wantStatus, response.StatusCode)
 		})
