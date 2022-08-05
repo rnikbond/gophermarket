@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -46,8 +45,6 @@ func main() {
 	if err := cfg.ParseFlags(); err != nil {
 		logrus.Fatalf("error read argv: %v\n", err)
 	}
-
-	log.Println(cfg)
 
 	db, errDB := pgDriver(cfg.DatabaseURI)
 	if errDB != nil {
