@@ -2,6 +2,7 @@ package gophermarket
 
 import (
 	"fmt"
+	"strings"
 )
 
 type User struct {
@@ -11,9 +12,11 @@ type User struct {
 
 func (u User) String() string {
 
-	s := "\n"
-	s += fmt.Sprintf("Username: %s\n", u.Username)
-	s += fmt.Sprintf("Password: %s\n", u.Password)
+	builder := strings.Builder{}
 
-	return s
+	builder.WriteString("\n")
+	builder.WriteString(fmt.Sprintf("Username: %s\n", u.Username))
+	builder.WriteString(fmt.Sprintf("Password: %s\n", u.Password))
+
+	return builder.String()
 }
