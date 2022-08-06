@@ -7,10 +7,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"gophermarket/internal/repository/postgres"
 	"gophermarket/internal/service"
+	"gophermarket/internal/tasks"
 	"gophermarket/pkg"
 
 	"github.com/jmoiron/sqlx"
@@ -61,26 +61,27 @@ func main() {
 		logrus.Fatalf("error create postgres repository: %v\n", errRepo)
 	}
 
+	accrualScanner := tasks.NewScanner(cfg.AccrualAddress, pgRepo)
 	services := service.NewServices(pgRepo, cfg.PasswordSalt)
 	handlers := handler.NewHandler(services, cfg.TokenKey)
 	srv := new(market.Server)
 
 	go func() {
-		if err := srv.Run(":8080", handlers.InitRoutes()); err != nil {
+		if err := srv.Run(cfg.Address, handlers.InitRoutes()); err != nil {
 			if err != http.ErrServerClosed {
 				logrus.Fatalf("error occured while running http server: %v\n", err)
 			}
 		}
 	}()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	if err := accrualScanner.Scan(ctx); err != nil {
+		logrus.Fatalf("error run accrual scanner task: %v\n", err)
+	}
+
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-done
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer func() {
-		cancel()
-	}()
 
 	if err := db.Close(); err != nil {
 		logrus.Fatalf("error close database connection:%+v", err)
@@ -91,4 +92,6 @@ func main() {
 			logrus.Fatalf("Server Shutdown Failed:%+v", err)
 		}
 	}
+
+	cancel()
 }

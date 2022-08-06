@@ -7,6 +7,7 @@ import (
 	market "gophermarket/pkg"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 )
 
 type Order struct {
@@ -19,6 +20,7 @@ func NewOrderPostgres(db *sqlx.DB) repository.Order {
 	}
 }
 
+// Create - Создание нового заказа
 func (pg Order) Create(number int64, username string) error {
 
 	var userID int64
@@ -43,6 +45,41 @@ func (pg Order) Create(number int64, username string) error {
 
 	// Если дошли сюда - значит такого заказа еще не было - создаем
 
-	_, err := pg.db.Exec(queryCreateOrder, userID, number, "NEW", time.Now().Format(time.RFC3339))
+	_, err := pg.db.Exec(queryCreateOrder, userID, number, "PROCESSING", time.Now().Format(time.RFC3339))
+	return err
+}
+
+// GetByStatus - Получение заказов с запрашиваемым статусом
+func (pg Order) GetByStatus(status string) ([]int64, error) {
+
+	var orders []int64
+
+	rows, err := pg.db.Query(queryOrdersByStatus, status)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if err := rows.Close(); err != nil {
+			logrus.Printf("error close rows: %v\n", err)
+		}
+	}()
+
+	for rows.Next() {
+		var order int64
+		if err := rows.Scan(&order); err != nil {
+			return nil, err
+		}
+
+		orders = append(orders, order)
+	}
+
+	return orders, nil
+}
+
+// SetStatus - Изменение статуса заказа
+func (pg Order) SetStatus(order int64, status string) error {
+
+	_, err := pg.db.Exec(queryUpdateOrder, status, order)
 	return err
 }

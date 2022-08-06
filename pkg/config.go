@@ -58,12 +58,12 @@ func (cfg *Config) ReadEnvVars() {
 // ParseFlags - Разбор аргументов командной строки
 func (cfg *Config) ParseFlags() error {
 
-	flag.StringVar(&cfg.AccrualAddress, "r", cfg.AccrualAddress, "string - accrual address")
+	flag.StringVar(&cfg.AccrualAddress, "r", "localhost:8080", "string - accrual address")
 	flag.StringVar(&cfg.DatabaseURI, "d", cfg.DatabaseURI, "string - database DSN")
 	flag.StringVar(&cfg.TokenKey, "t", "secretKeyJWT", "string - secret key JWT")
 	flag.StringVar(&cfg.PasswordSalt, "s", "salt-salt-salt", "string - password salt")
 
-	addr := flag.String("a", cfg.Address, "string - host:port")
+	addr := flag.String("a", "localhost:8001", "string - host:port")
 	flag.Parse()
 
 	if addr == nil || *addr == "" {
