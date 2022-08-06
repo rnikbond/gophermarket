@@ -7,6 +7,7 @@ import (
 	market "gophermarket/pkg"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 )
 
@@ -49,12 +50,10 @@ func (pg Order) Create(number int64, username string) error {
 	return err
 }
 
-// GetByStatus - Получение заказов с запрашиваемым статусом
-func (pg Order) GetByStatus(status string) ([]int64, error) {
+// GetByStatuses - Получение заказов с запрашиваемым статусом
+func (pg Order) GetByStatuses(statuses []string) (map[int64]string, error) {
 
-	var orders []int64
-
-	rows, err := pg.db.Query(queryOrdersByStatus, status)
+	rows, err := pg.db.Query(queryOrdersByStatuses, pq.Array(&statuses))
 	if err != nil {
 		return nil, err
 	}
@@ -65,13 +64,17 @@ func (pg Order) GetByStatus(status string) ([]int64, error) {
 		}
 	}()
 
+	orders := make(map[int64]string)
+
 	for rows.Next() {
-		var order int64
-		if err := rows.Scan(&order); err != nil {
+		var orderNum int64
+		var status string
+
+		if err := rows.Scan(&orderNum, &status); err != nil {
 			return nil, err
 		}
 
-		orders = append(orders, order)
+		orders[orderNum] = status
 	}
 
 	return orders, nil

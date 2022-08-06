@@ -12,7 +12,7 @@ type Authorization interface {
 
 type Order interface {
 	Create(number int64, username string) error
-	GetByStatus(status string) ([]int64, error)
+	GetByStatuses(statuses []string) (map[int64]string, error)
 	SetStatus(order int64, status string) error
 }
 

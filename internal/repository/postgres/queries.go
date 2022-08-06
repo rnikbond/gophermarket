@@ -25,7 +25,7 @@ const (
                         FROM orders 
                         WHERE number = $1`
 
-	queryOrdersByStatus = `SELECT number
-                           FROM orders
-                           WHERE status = $1`
+	queryOrdersByStatuses = `SELECT number, status
+                             FROM orders
+                             WHERE status = ANY($1)`
 )
