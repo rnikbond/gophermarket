@@ -56,60 +56,86 @@ func (scan AccrualScanner) Scan(ctx context.Context) error {
 // updateOrderStatuses - Обновление статусов заказов в репозитории
 func (scan AccrualScanner) updateOrderStatuses(ctx context.Context, orders map[int64]string) {
 
-	ordersAccrual := scan.orderStatusesAccrual(ctx, orders)
+	ordersAccrual := scan.ordersAccrualService(ctx, orders)
+
+	searcher := func(orders *[]pkgOrder.AccrualOrder, targetOrder int64) (int, bool) {
+		for i, order := range *orders {
+			num, err := strconv.ParseInt(order.Order, 10, 64)
+			if err != nil {
+				continue
+			}
+
+			if num == targetOrder {
+				return i, true
+			}
+		}
+
+		return 0, false
+	}
 
 	for orderNum, status := range orders {
 
-		statusAccrual, ok := ordersAccrual[orderNum]
+		idx, ok := searcher(&ordersAccrual, orderNum)
 
 		if !ok { // Незавершенный заказ, который есть в репозитории, не найден в системе лояльности
-
 			if err := scan.repository.Order.SetStatus(orderNum, pkgOrder.StatusInvalid); err != nil {
 				logrus.Errorf("error update status order in repository on %s: %v\n", pkgOrder.StatusInvalid, err)
 			}
 			continue
 		}
 
-		if status == statusAccrual {
+		orderAccrual := ordersAccrual[idx]
+
+		// Статус в репозитории такой же, как и в системе лояльности
+		if status == orderAccrual.Status {
 			continue
 		}
 
-		if err := scan.repository.Order.SetStatus(orderNum, statusAccrual); err != nil {
+		if err := scan.repository.Order.SetStatus(orderNum, orderAccrual.Status); err != nil {
+			logrus.Errorf("error update status order in repository: %v\n", err)
+		}
+
+		if orderAccrual.Status != pkgOrder.StatusProcessed {
+			continue
+		}
+
+		// Заказ получил завершенный статус в системе лояльности - сохраняем баллы за заказ
+		if err := scan.repository.Order.SetAccrual(orderNum, orderAccrual.Accrual); err != nil {
 			logrus.Errorf("error update status order in repository: %v\n", err)
 		}
 	}
 }
 
 // orderStatusesAccrual - Загрузка статусов по заказам из системы лояльности
-func (scan AccrualScanner) orderStatusesAccrual(ctx context.Context, orders map[int64]string) map[int64]string {
+func (scan AccrualScanner) ordersAccrualService(ctx context.Context, orders map[int64]string) []pkgOrder.AccrualOrder {
 
-	ordersAccrual := make(map[int64]string)
+	var ordersAccrual []pkgOrder.AccrualOrder
 
 	for orderNum := range orders {
-		statusAccrual, err := scan.orderStatusAccrual(ctx, orderNum)
+		orderAccrual, err := scan.orderAccrualService(ctx, orderNum)
 		if err != nil {
 			logrus.Printf("error load order from accrual: %v\n", err)
 			continue
 		}
 
-		ordersAccrual[orderNum] = statusAccrual
+		ordersAccrual = append(ordersAccrual, orderAccrual)
 	}
 
 	return ordersAccrual
 }
 
-// orderStatusAccrual - Загрузка статуса заказа из системы лояльности
-func (scan AccrualScanner) orderStatusAccrual(ctx context.Context, orderNum int64) (string, error) {
+// orderAccrualService - Загрузка статуса заказа из системы лояльности
+func (scan AccrualScanner) orderAccrualService(ctx context.Context, orderNum int64) (pkgOrder.AccrualOrder, error) {
 
 	// TODO заюзать ctx
 
 	resp, errRequest := http.Get("http://" + scan.accrualAddr + "/api/orders/" + strconv.FormatInt(orderNum, 10))
 	if errRequest != nil {
-		return ``, errRequest
+		return pkgOrder.AccrualOrder{}, errRequest
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return ``, errors.New("order not found")
+		return pkgOrder.AccrualOrder{}, errors.New("order not found")
 	}
 
 	defer func() {
@@ -120,19 +146,21 @@ func (scan AccrualScanner) orderStatusAccrual(ctx context.Context, orderNum int6
 
 	data, errRead := io.ReadAll(resp.Body)
 	if errRead != nil {
-		return ``, errRead
+		return pkgOrder.AccrualOrder{}, errRead
 	}
 
 	var orderAccrual pkgOrder.AccrualOrder
 	if err := json.Unmarshal(data, &orderAccrual); err != nil {
-		return ``, err
+		return pkgOrder.AccrualOrder{}, err
 	}
+
+	fmt.Println(orderAccrual)
 
 	if len(orderAccrual.Status) < 1 {
-		return ``, errors.New("accrual service returned empty status")
+		return pkgOrder.AccrualOrder{}, errors.New("accrual service returned empty status")
 	}
 
-	return orderAccrual.Status, nil
+	return orderAccrual, nil
 }
 
 // reloadOrders - Загрузка заказов из репозитория, у которых незавершенный статус начисления баллов

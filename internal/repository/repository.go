@@ -14,6 +14,7 @@ type Order interface {
 	Create(number int64, username string) error
 	GetByStatuses(statuses []string) (map[int64]string, error)
 	SetStatus(order int64, status string) error
+	SetAccrual(order int64, accrual int64) error
 }
 
 type Repository struct {

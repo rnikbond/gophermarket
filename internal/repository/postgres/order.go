@@ -5,6 +5,7 @@ import (
 
 	"gophermarket/internal/repository"
 	market "gophermarket/pkg"
+	pkgOrder "gophermarket/pkg/order"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -46,7 +47,7 @@ func (pg Order) Create(number int64, username string) error {
 
 	// Если дошли сюда - значит такого заказа еще не было - создаем
 
-	_, err := pg.db.Exec(queryCreateOrder, userID, number, "PROCESSING", time.Now().Format(time.RFC3339))
+	_, err := pg.db.Exec(queryCreateOrder, userID, number, pkgOrder.StatusNew, time.Now().Format(time.RFC3339))
 	return err
 }
 
@@ -84,5 +85,12 @@ func (pg Order) GetByStatuses(statuses []string) (map[int64]string, error) {
 func (pg Order) SetStatus(order int64, status string) error {
 
 	_, err := pg.db.Exec(queryUpdateOrder, status, order)
+	return err
+}
+
+// SetAccrual - Изменение начислений по заказу
+func (pg Order) SetAccrual(order int64, accrual int64) error {
+
+	_, err := pg.db.Exec(queryUpdateAccrual, accrual, order)
 	return err
 }

@@ -24,18 +24,25 @@ func createTables(db *sqlx.DB) error {
 
 	tables := []string{
 		`CREATE TABLE IF NOT EXISTS users (
-             id SERIAL PRIMARY KEY,
-             username CHARACTER VARYING(50),
-        password_hash CHARACTER VARYING(64)
+                     id SERIAL PRIMARY KEY,
+               username CHARACTER VARYING(50),
+          password_hash CHARACTER VARYING(64)
         );`,
 
 		`CREATE TABLE IF NOT EXISTS orders (
-                id SERIAL PRIMARY KEY,
-           user_id INTEGER REFERENCES users (id),
-            number BIGINT UNIQUE,
-            status CHARACTER VARYING(50),
-        created_at TIMESTAMP
+                    id SERIAL PRIMARY KEY,
+               user_id INTEGER REFERENCES users (id),
+                number BIGINT UNIQUE,
+                status CHARACTER VARYING(50),
+          processed_at TIMESTAMP,
+               accrual INTEGER DEFAULT 0
         );`,
+
+		`CREATE TABLE IF NOT EXISTS withdrawals (
+                 id SERIAL PRIMARY KEY,
+           order_id INTEGER REFERENCES orders (id),
+                sum INTEGER
+         );`,
 	}
 
 	for _, query := range tables {

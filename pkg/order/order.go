@@ -1,7 +1,9 @@
 package order
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -13,8 +15,9 @@ const (
 )
 
 type AccrualOrder struct {
-	Order  string `json:"order"`
-	Status string `json:"status"`
+	Order   string `json:"order"`
+	Status  string `json:"status"`
+	Accrual int64  `json:"accrual,omitempty"`
 }
 
 type Order struct {
@@ -33,4 +36,13 @@ func ToOrder(order AccrualOrder) (Order, error) {
 		Order:  num,
 		Status: order.Status,
 	}, nil
+}
+
+func (o AccrualOrder) String() string {
+	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("Order  : %s\n", o.Order))
+	builder.WriteString(fmt.Sprintf("Status : %s\n", o.Status))
+	builder.WriteString(fmt.Sprintf("Accrual: %d\n", o.Accrual))
+
+	return builder.String()
 }
