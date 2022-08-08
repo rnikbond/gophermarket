@@ -10,6 +10,11 @@ import (
 
 func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
+	if r.Header.Get("Content-Type") != "text/plain" {
+		http.Error(w, http.StatusText(http.StatusUnsupportedMediaType), http.StatusUnsupportedMediaType)
+		return
+	}
+
 	username, _, ok := r.BasicAuth()
 	if !ok {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

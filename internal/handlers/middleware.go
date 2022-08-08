@@ -9,11 +9,6 @@ import (
 func (h *Handler) VerifyUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		if r.Header.Get("Content-Type") != "text/plain" {
-			http.Error(w, http.StatusText(http.StatusUnsupportedMediaType), http.StatusUnsupportedMediaType)
-			return
-		}
-
 		cookie, errCookie := r.Cookie("token")
 		if errCookie != nil {
 			http.Error(w, pkg.ErrUserUnauthorized.Error(), pkg.ErrorHTTP(pkg.ErrUserUnauthorized))
