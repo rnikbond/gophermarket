@@ -11,24 +11,25 @@ import (
 	"time"
 
 	"gophermarket/internal/repository"
+	"gophermarket/pkg/logpack"
 	pkgOrder "gophermarket/pkg/order"
-
-	"github.com/sirupsen/logrus"
 )
 
-type Accrual interface {
+type LoyaltyTask interface {
 	Scan(ctx context.Context) error
 }
 
 type AccrualScanner struct {
 	accrualAddr string
+	logger      *logpack.LogPack
 	repository  *repository.Repository
 }
 
-func NewScanner(addr string, repo *repository.Repository) Accrual {
+func NewScanner(addr string, repo *repository.Repository, logger *logpack.LogPack) LoyaltyTask {
 	return &AccrualScanner{
 		accrualAddr: addr,
 		repository:  repo,
+		logger:      logger,
 	}
 }
 
@@ -41,7 +42,7 @@ func (scan AccrualScanner) Scan(ctx context.Context) error {
 		case <-ticker.C:
 			orders, errReload := scan.reloadOrders(ctx)
 			if errReload != nil {
-				logrus.Errorf("error reload orders from repository: %v\n", errReload)
+				scan.logger.Err.Printf("error reload orders from repository: %s\n", errReload)
 				continue
 			}
 
@@ -79,7 +80,7 @@ func (scan AccrualScanner) updateOrderStatuses(ctx context.Context, orders map[i
 
 		if !ok { // Незавершенный заказ, который есть в репозитории, не найден в системе лояльности
 			if err := scan.repository.Order.SetStatus(orderNum, pkgOrder.StatusInvalid); err != nil {
-				logrus.Errorf("error update status order in repository on %s: %v\n", pkgOrder.StatusInvalid, err)
+				scan.logger.Err.Printf("error update status order in repository on %s: %s\n", pkgOrder.StatusInvalid, err)
 			}
 			continue
 		}
@@ -92,7 +93,7 @@ func (scan AccrualScanner) updateOrderStatuses(ctx context.Context, orders map[i
 		}
 
 		if err := scan.repository.Order.SetStatus(orderNum, orderAccrual.Status); err != nil {
-			logrus.Errorf("error update status order in repository: %v\n", err)
+			scan.logger.Err.Printf("error update status order in repository: %s\n", err)
 		}
 
 		if orderAccrual.Status != pkgOrder.StatusProcessed {
@@ -100,8 +101,8 @@ func (scan AccrualScanner) updateOrderStatuses(ctx context.Context, orders map[i
 		}
 
 		// Заказ получил завершенный статус в системе лояльности - сохраняем баллы за заказ
-		if err := scan.repository.Order.SetAccrual(orderNum, orderAccrual.Accrual); err != nil {
-			logrus.Errorf("error update status order in repository: %v\n", err)
+		if err := scan.repository.Loyalty.SetAccrual(orderNum, orderAccrual.Accrual); err != nil {
+			scan.logger.Err.Printf("error update status order in repository: %s\n", err)
 		}
 	}
 }
@@ -114,7 +115,7 @@ func (scan AccrualScanner) ordersAccrualService(ctx context.Context, orders map[
 	for orderNum := range orders {
 		orderAccrual, err := scan.orderAccrualService(ctx, orderNum)
 		if err != nil {
-			logrus.Printf("error load order from accrual: %v\n", err)
+			scan.logger.Err.Printf("error load order from accrual: %s\n", err)
 			continue
 		}
 
@@ -140,7 +141,7 @@ func (scan AccrualScanner) orderAccrualService(ctx context.Context, orderNum int
 
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			logrus.Errorf(err.Error())
+			scan.logger.Err.Printf("could not close response body: %s\n", err)
 		}
 	}()
 
@@ -174,8 +175,9 @@ func (scan AccrualScanner) reloadOrders(ctx context.Context) (map[int64]string, 
 	}
 	orders, err := scan.repository.Order.GetByStatuses(statuses)
 	if err != nil {
-		logrus.Printf("repo return error : %v\n", err)
-		return nil, fmt.Errorf("error reload processing orders: %v", err)
+		scan.logger.Err.Printf("could not reload orders with statuses [%s,%s]: %s\n",
+			pkgOrder.StatusNew, pkgOrder.StatusProcessing, err)
+		return nil, err
 	}
 
 	return orders, nil

@@ -23,6 +23,13 @@ type Order struct {
 	Status string
 }
 
+type InfoOrder struct {
+	Order      int64   `json:"number"`
+	Status     string  `json:"status"`
+	Accrual    float64 `json:"accrual,omitempty"`
+	UploadedAt string  `json:"uploaded_at"`
+}
+
 func (o AccrualOrder) String() string {
 	builder := strings.Builder{}
 	builder.WriteString(fmt.Sprintf("Order  : %s\n", o.Order))

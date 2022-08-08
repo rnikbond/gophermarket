@@ -2,81 +2,53 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"gophermarket/internal/repository"
 	"gophermarket/internal/repository/postgres"
 	"gophermarket/internal/service"
 	"gophermarket/internal/tasks"
 	"gophermarket/pkg"
+	"gophermarket/pkg/logpack"
+
+	market "gophermarket/internal"
+	"gophermarket/internal/handlers"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"github.com/sirupsen/logrus"
-
-	market "gophermarket/internal"
-	"gophermarket/internal/handler"
 )
-
-func configureLog() {
-
-	logrus.SetFormatter(new(logrus.JSONFormatter))
-}
-
-func pgDriver(dsn string) (*sqlx.DB, error) {
-
-	db, err := sqlx.Open("postgres", dsn)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := db.Ping(); err != nil {
-		return nil, err
-	}
-
-	return db, nil
-}
 
 func main() {
 
-	configureLog()
+	logger := Logger()
+	cfg := Config(logger)
 
-	cfg := pkg.NewConfig()
-	if err := cfg.ParseFlags(); err != nil {
-		logrus.Fatalf("error read argv: %v\n", err)
-	}
+	logger.Info.Println(cfg)
 
-	log.Println(cfg)
+	db := PostgresDB(cfg.DatabaseURI, logger)
+	pgRepo := PostgresRepository(db, logger)
+	loyalty := LoyaltyTask(cfg.AccrualAddress, pgRepo, logger)
+	services := service.NewServices(pgRepo, cfg.PasswordSalt, logger)
+	handler := handlers.NewHandler(services, cfg.TokenKey, logger)
+	server := new(market.Server)
 
-	db, errDB := pgDriver(cfg.DatabaseURI)
-	if errDB != nil {
-		logrus.Fatalf("error create connection to database: %v\n", errDB)
-	}
+	ctx, cancel := context.WithCancel(context.Background())
 
-	pgRepo, errRepo := postgres.NewPostgresRepository(db)
-	if errRepo != nil {
-		logrus.Fatalf("error create postgres repository: %v\n", errRepo)
-	}
-
-	accrualScanner := tasks.NewScanner(cfg.AccrualAddress, pgRepo)
-	services := service.NewServices(pgRepo, cfg.PasswordSalt)
-	handlers := handler.NewHandler(services, cfg.TokenKey)
-	srv := new(market.Server)
-
+	// Запуск сервера
 	go func() {
-		if err := srv.Run(cfg.Address, handlers.InitRoutes()); err != nil {
+		if err := server.Run(cfg.Address, handler.InitRoutes()); err != nil {
 			if err != http.ErrServerClosed {
-				logrus.Fatalf("error occured while running http server: %v\n", err)
+				logger.Fatal.Fatalf("error occurred while running http server: %s\n", err)
 			}
 		}
 	}()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	if err := accrualScanner.Scan(ctx); err != nil {
-		logrus.Fatalf("error run accrual scanner task: %v\n", err)
+	// Запуск задачи для обновления статусов и балло из системы лояльности
+	if err := loyalty.Scan(ctx); err != nil {
+		logger.Fatal.Fatalf("could not run loyalty scanner task: %s\n", err)
 	}
 
 	done := make(chan os.Signal, 1)
@@ -84,14 +56,56 @@ func main() {
 	<-done
 
 	if err := db.Close(); err != nil {
-		logrus.Fatalf("error close database connection:%+v", err)
+		logger.Err.Printf("could not close database connection: %s\n", err)
 	}
 
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := server.Shutdown(ctx); err != nil {
 		if err != http.ErrServerClosed {
-			logrus.Fatalf("Server Shutdown Failed:%+v", err)
+			logger.Err.Printf("failed shutdown server: %s\n", err)
 		}
 	}
 
 	cancel()
+}
+
+func Logger() *logpack.LogPack {
+	return logpack.NewLogger()
+}
+
+func Config(logger *logpack.LogPack) *pkg.Config {
+	cfg := pkg.NewConfig()
+	if err := cfg.ParseFlags(); err != nil {
+		logger.Fatal.Fatalf("could not parse argv: %s\n", err)
+	}
+
+	return cfg
+}
+
+func PostgresDB(dsn string, logger *logpack.LogPack) *sqlx.DB {
+
+	db, errOpen := sqlx.Open("postgres", dsn)
+	if errOpen != nil {
+		logger.Fatal.Fatalf("failed to connect to the database: %s\n", errOpen)
+	}
+
+	if err := db.Ping(); err != nil {
+		logger.Fatal.Fatalf("connection to DB created, but Ping returned error: %s\n", err)
+	}
+
+	return db
+}
+
+func PostgresRepository(db *sqlx.DB, logger *logpack.LogPack) *repository.Repository {
+
+	repo, errRepo := postgres.NewPostgresRepository(db, logger)
+	if errRepo != nil {
+		logger.Fatal.Fatalf("failed create repository: %s\n", errRepo)
+	}
+
+	return repo
+}
+
+func LoyaltyTask(loyaltyAddr string, repo *repository.Repository, logger *logpack.LogPack) tasks.LoyaltyTask {
+
+	return tasks.NewScanner(loyaltyAddr, repo, logger)
 }

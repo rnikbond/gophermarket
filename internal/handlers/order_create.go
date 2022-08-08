@@ -1,4 +1,4 @@
-package handler
+package handlers
 
 import (
 	"io"
@@ -6,8 +6,6 @@ import (
 	"strconv"
 
 	market "gophermarket/pkg"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
@@ -20,7 +18,7 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	defer func() {
 		if err := r.Body.Close(); err != nil {
-			logrus.Errorf("handler CreateOrder :: error close request body: %v", err)
+			h.logger.Err.Printf("could not close request body: %s\n", err)
 		}
 	}()
 

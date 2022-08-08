@@ -1,25 +1,27 @@
 package postgres
 
 import (
-	"log"
+	"fmt"
 	"time"
 
 	"gophermarket/internal/repository"
 	market "gophermarket/pkg"
+	"gophermarket/pkg/logpack"
 	pkgOrder "gophermarket/pkg/order"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	"github.com/sirupsen/logrus"
 )
 
 type Order struct {
-	db *sqlx.DB
+	logger *logpack.LogPack
+	db     *sqlx.DB
 }
 
-func NewOrderPostgres(db *sqlx.DB) repository.Order {
+func NewOrderPostgres(db *sqlx.DB, logger *logpack.LogPack) repository.Order {
 	return &Order{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 
@@ -62,7 +64,7 @@ func (pg Order) GetByStatuses(statuses []string) (map[int64]string, error) {
 
 	defer func() {
 		if err := rows.Close(); err != nil {
-			logrus.Printf("error close rows: %v\n", err)
+			pg.logger.Err.Printf("could not close rows: %s\n", err)
 		}
 	}()
 
@@ -93,41 +95,47 @@ func (pg Order) SetStatus(order int64, status string) error {
 	return err
 }
 
-// SetAccrual - Изменение начислений по заказу
-func (pg Order) SetAccrual(order int64, accrual float64) error {
-
-	_, err := pg.db.Exec(queryUpdateAccrual, int64(accrual*100), order)
-	return err
-}
-
-func (pg Order) Accruals(username string) (float64, error) {
+func (pg Order) UserOrders(username string) ([]pkgOrder.InfoOrder, error) {
 
 	var userID int64
 	row := pg.db.QueryRow(queryGetUserIDByName, username)
 	if err := row.Scan(&userID); err != nil {
-		return 0, market.ErrUserNotFound
+		return nil, market.ErrUserNotFound
 	}
 
-	row = pg.db.QueryRow(queryUserAccruals, userID)
-
-	var accrualsUser int64
-	if err := row.Scan(&accrualsUser); err != nil {
-		// TODO Если у пользователя нет было, то Scan возвращает
-		// error при записи NULL в int64
-		log.Printf("error get accruals: %v\n", err)
-		return 0, nil
+	rows, err := pg.db.Query(queryUserOrders, userID)
+	if err != nil {
+		return nil, err
 	}
 
-	return float64(accrualsUser / 100), nil
-}
+	defer func() {
+		if err := rows.Close(); err != nil {
+			pg.logger.Err.Printf("could not close rows: %s\n", err)
+		}
+	}()
 
-func (pg Order) Withdrawals(username string) (float64, error) {
+	var infoOrders []pkgOrder.InfoOrder
 
-	var userID int64
-	row := pg.db.QueryRow(queryGetUserIDByName, username)
-	if err := row.Scan(&userID); err != nil {
-		return 0, market.ErrUserNotFound
+	for rows.Next() {
+		var infoOrder pkgOrder.InfoOrder
+		errScan := rows.Scan(&infoOrder.Order, &infoOrder.Status, &infoOrder.Accrual, &infoOrder.UploadedAt)
+		if errScan != nil {
+			return nil, errScan
+		}
+
+		fmt.Println(infoOrder.UploadedAt)
+
+		tmp, _ := time.Parse(time.RFC3339, infoOrder.UploadedAt)
+		infoOrder.UploadedAt = tmp.Format("2006-01-02T15:04:05-0700")
+
+		fmt.Println(infoOrder.UploadedAt)
+
+		infoOrders = append(infoOrders, infoOrder)
 	}
 
-	return 0, nil
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return infoOrders, nil
 }

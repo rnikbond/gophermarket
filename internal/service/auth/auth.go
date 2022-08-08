@@ -4,6 +4,7 @@ import (
 	market "gophermarket/internal"
 	"gophermarket/internal/repository"
 	"gophermarket/pkg"
+	"gophermarket/pkg/logpack"
 )
 
 type ServiceAuth interface {
@@ -14,14 +15,16 @@ type ServiceAuth interface {
 }
 
 type Auth struct {
+	logger       *logpack.LogPack
 	repo         *repository.Repository
 	passwordSalt string
 }
 
-func NewService(repo *repository.Repository, pwdSalt string) ServiceAuth {
+func NewService(repo *repository.Repository, pwdSalt string, logger *logpack.LogPack) ServiceAuth {
 	return &Auth{
 		repo:         repo,
 		passwordSalt: pwdSalt,
+		logger:       logger,
 	}
 }
 

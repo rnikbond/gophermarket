@@ -3,21 +3,24 @@ package order
 import (
 	"gophermarket/internal/repository"
 	market "gophermarket/pkg"
+	"gophermarket/pkg/logpack"
+	"gophermarket/pkg/order"
 )
 
 type ServiceOrder interface {
 	Create(number int64, username string) error
-	Accruals(username string) (float64, error)
-	Withdrawals(username string) (float64, error)
+	UserOrders(username string) ([]order.InfoOrder, error)
 }
 
 type Order struct {
-	repo *repository.Repository
+	logger *logpack.LogPack
+	repo   *repository.Repository
 }
 
-func NewService(repo *repository.Repository) ServiceOrder {
+func NewService(repo *repository.Repository, logger *logpack.LogPack) ServiceOrder {
 	return &Order{
-		repo: repo,
+		repo:   repo,
+		logger: logger,
 	}
 }
 
@@ -30,12 +33,6 @@ func (or Order) Create(number int64, username string) error {
 	return or.repo.Order.Create(number, username)
 }
 
-func (or Order) Accruals(username string) (float64, error) {
-
-	return or.repo.Order.Accruals(username)
-}
-
-func (or Order) Withdrawals(username string) (float64, error) {
-
-	return or.repo.Order.Withdrawals(username)
+func (or Order) UserOrders(username string) ([]order.InfoOrder, error) {
+	return or.repo.Order.UserOrders(username)
 }

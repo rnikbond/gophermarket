@@ -4,17 +4,20 @@ import (
 	market "gophermarket/internal"
 	"gophermarket/internal/repository"
 	"gophermarket/pkg"
+	"gophermarket/pkg/logpack"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type Authorization struct {
-	db *sqlx.DB
+	logger *logpack.LogPack
+	db     *sqlx.DB
 }
 
-func NewAuthPostgres(db *sqlx.DB) repository.Authorization {
+func NewAuthPostgres(db *sqlx.DB, logger *logpack.LogPack) repository.Authorization {
 	return &Authorization{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 }
 

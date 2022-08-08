@@ -1,10 +1,9 @@
-package handler
+package handlers
 
 import (
 	"encoding/json"
 	"net/http"
 
-	gophermarket "gophermarket/internal"
 	"gophermarket/pkg"
 )
 
@@ -18,21 +17,10 @@ func (h *Handler) Balance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accruals, err := h.services.Order.Accruals(username)
+	balance, err := h.services.Loyalty.Balance(username)
 	if err != nil {
 		w.WriteHeader(pkg.ErrorHTTP(err))
 		return
-	}
-
-	withdrawals, err := h.services.Order.Withdrawals(username)
-	if err != nil {
-		w.WriteHeader(pkg.ErrorHTTP(err))
-		return
-	}
-
-	balance := gophermarket.Balance{
-		Accrual:   accruals,
-		Withdrawn: withdrawals,
 	}
 
 	data, err := json.Marshal(&balance)
