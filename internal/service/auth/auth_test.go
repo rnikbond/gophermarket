@@ -6,6 +6,7 @@ import (
 	market "gophermarket/internal"
 	"gophermarket/internal/repository"
 	"gophermarket/pkg"
+	"gophermarket/pkg/logpack"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -97,7 +98,7 @@ func TestAuth_SignUp(t *testing.T) {
 				Authorization: authRepoMock,
 			}
 
-			authService := NewService(&repo, salt)
+			authService := NewService(&repo, salt, logpack.NewLogger())
 
 			err := authService.SignUp(tt.args.userAuth)
 			assert.Equal(t, err, tt.args.waitErrSignUp)
@@ -187,7 +188,7 @@ func TestAuth_SignIn(t *testing.T) {
 				Authorization: authRepoMock,
 			}
 
-			authService := NewService(&repo, salt)
+			authService := NewService(&repo, salt, logpack.NewLogger())
 
 			err := authService.SignIn(tt.args.userAuth)
 			assert.Equal(t, err, tt.args.waitErrSignUp)
