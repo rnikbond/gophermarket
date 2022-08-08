@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"strconv"
 	"time"
 
 	"gophermarket/internal/repository"
@@ -117,10 +118,13 @@ func (pg Order) UserOrders(username string) ([]pkgOrder.InfoOrder, error) {
 
 	for rows.Next() {
 		var infoOrder pkgOrder.InfoOrder
-		errScan := rows.Scan(&infoOrder.Order, &infoOrder.Status, &infoOrder.Accrual, &infoOrder.UploadedAt)
+		var orderNum int64
+
+		errScan := rows.Scan(&orderNum, &infoOrder.Status, &infoOrder.Accrual, &infoOrder.UploadedAt)
 		if errScan != nil {
 			return nil, errScan
 		}
+		infoOrder.Order = strconv.FormatInt(orderNum, 10)
 
 		infoOrders = append(infoOrders, infoOrder)
 	}
