@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"log"
 	"time"
 
 	"gophermarket/internal/repository"
@@ -89,8 +90,40 @@ func (pg Order) SetStatus(order int64, status string) error {
 }
 
 // SetAccrual - Изменение начислений по заказу
-func (pg Order) SetAccrual(order int64, accrual int64) error {
+func (pg Order) SetAccrual(order int64, accrual float64) error {
 
-	_, err := pg.db.Exec(queryUpdateAccrual, accrual, order)
+	_, err := pg.db.Exec(queryUpdateAccrual, int64(accrual*100), order)
 	return err
+}
+
+func (pg Order) Accruals(username string) (float64, error) {
+
+	var userID int64
+	row := pg.db.QueryRow(queryGetUserIDByName, username)
+	if err := row.Scan(&userID); err != nil {
+		return 0, market.ErrUserNotFound
+	}
+
+	row = pg.db.QueryRow(queryUserAccruals, userID)
+
+	var accrualsUser int64
+	if err := row.Scan(&accrualsUser); err != nil {
+		// TODO Если у пользователя нет было, то Scan возвращает
+		// error при записи NULL в int64
+		log.Printf("error get accruals: %v\n", err)
+		return 0, nil
+	}
+
+	return float64(accrualsUser / 100), nil
+}
+
+func (pg Order) Withdrawals(username string) (float64, error) {
+
+	var userID int64
+	row := pg.db.QueryRow(queryGetUserIDByName, username)
+	if err := row.Scan(&userID); err != nil {
+		return 0, market.ErrUserNotFound
+	}
+
+	return 0, nil
 }

@@ -16,7 +16,7 @@ const (
 
 // Order
 const (
-	queryCreateOrder = `INSERT INTO orders (user_id, number,status,processed_at) 
+	queryCreateOrder = `INSERT INTO orders (user_id, number,status, uploaded_at) 
                         VALUES($1,$2,$3,$4)`
 
 	queryUpdateOrder = `UPDATE orders
@@ -34,4 +34,11 @@ const (
 	queryOrdersByStatuses = `SELECT number, status
                              FROM orders
                              WHERE status = ANY($1)`
+)
+
+// Accruals
+const (
+	queryUserAccruals = `SELECT SUM(accrual)
+                         FROM orders
+                         WHERE user_id = $1`
 )

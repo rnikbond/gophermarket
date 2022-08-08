@@ -45,6 +45,7 @@ func (h *Handler) InitRoutes() *chi.Mux {
 		r.Group(func(r chi.Router) {
 			r.Use(h.VerifyUser)
 			r.Post("/orders", h.CreateOrder)
+			r.Get("/balance", h.Balance)
 		})
 	})
 

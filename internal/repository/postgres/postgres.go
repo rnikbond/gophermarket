@@ -33,16 +33,16 @@ func createTables(db *sqlx.DB) error {
                     id SERIAL PRIMARY KEY,
                user_id INTEGER REFERENCES users (id),
                 number BIGINT UNIQUE,
+           uploaded_at TIMESTAMP,
                 status CHARACTER VARYING(50),
-          processed_at TIMESTAMP,
                accrual INTEGER DEFAULT 0
         );`,
 
-		`CREATE TABLE IF NOT EXISTS withdrawals (
-                 id SERIAL PRIMARY KEY,
-           order_id INTEGER REFERENCES orders (id),
-                sum INTEGER
-         );`,
+		//`CREATE TABLE IF NOT EXISTS withdrawals (
+		//         id SERIAL PRIMARY KEY,
+		//   order_id INTEGER REFERENCES orders (id),
+		// withdrawal MONEY
+		// );`,
 	}
 
 	for _, query := range tables {

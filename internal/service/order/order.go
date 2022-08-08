@@ -7,6 +7,8 @@ import (
 
 type ServiceOrder interface {
 	Create(number int64, username string) error
+	Accruals(username string) (float64, error)
+	Withdrawals(username string) (float64, error)
 }
 
 type Order struct {
@@ -26,4 +28,14 @@ func (or Order) Create(number int64, username string) error {
 	}
 
 	return or.repo.Order.Create(number, username)
+}
+
+func (or Order) Accruals(username string) (float64, error) {
+
+	return or.repo.Order.Accruals(username)
+}
+
+func (or Order) Withdrawals(username string) (float64, error) {
+
+	return or.repo.Order.Withdrawals(username)
 }
