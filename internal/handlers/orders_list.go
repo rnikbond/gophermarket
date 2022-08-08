@@ -25,6 +25,11 @@ func (h *Handler) OrdersList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(orders) < 1 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	data, err := json.Marshal(&orders)
 	if err != nil {
 		log.Printf("OrdersList :: error marshal user orders list: %v\n", err)
