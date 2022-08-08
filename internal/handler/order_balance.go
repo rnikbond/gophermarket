@@ -39,6 +39,7 @@ func (h *Handler) Balance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	if _, err := w.Write(data); err != nil {
 		http.Error(w, "error write json-balance in response", http.StatusInternalServerError)
 		return
