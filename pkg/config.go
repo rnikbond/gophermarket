@@ -53,13 +53,14 @@ func (cfg *Config) ReadEnvVars() {
 
 	// Убираем пробелы из адреса
 	cfg.Address = strings.TrimSpace(cfg.Address)
+	log.Printf("Read env. DB: %s\n", cfg.DatabaseURI)
 }
 
 // ParseFlags - Разбор аргументов командной строки
 func (cfg *Config) ParseFlags() error {
 
 	flag.StringVar(&cfg.AccrualAddress, "r", ":8080", "string - accrual address")
-	flag.StringVar(&cfg.DatabaseURI, "d", "", "string - database DSN")
+	flag.StringVar(&cfg.DatabaseURI, "d", cfg.DatabaseURI, "string - database DSN")
 	flag.StringVar(&cfg.TokenKey, "t", "secretKeyJWT", "string - secret key JWT")
 	flag.StringVar(&cfg.PasswordSalt, "s", "salt-salt-salt", "string - password salt")
 
