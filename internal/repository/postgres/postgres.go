@@ -35,7 +35,7 @@ func createTables(db *sqlx.DB) error {
                     id SERIAL PRIMARY KEY,
                user_id INTEGER REFERENCES users (id),
                 number BIGINT UNIQUE,
-           uploaded_at TIMESTAMP,
+           uploaded_at TIMESTAMPTZ,
                 status CHARACTER VARYING(50),
                accrual INTEGER DEFAULT 0
         );`,
