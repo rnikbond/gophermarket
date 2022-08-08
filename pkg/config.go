@@ -13,7 +13,7 @@ import (
 )
 
 type Config struct {
-	Address        string `env:"RUN_ADDRESS "`
+	Address        string `env:"RUN_ADDRESS"`
 	DatabaseURI    string `env:"DATABASE_URI"`
 	AccrualAddress string `env:"ACCRUAL_SYSTEM_ADDRESS"`
 	TokenKey       string `env:"TOKEN_KEY"`
