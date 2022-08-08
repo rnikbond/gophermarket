@@ -175,7 +175,7 @@ func (scan AccrualScanner) reloadOrders(ctx context.Context) (map[int64]string, 
 	orders, err := scan.repository.Order.GetByStatuses(statuses)
 	if err != nil {
 		logrus.Printf("repo return error : %v\n", err)
-		return nil, errors.New(fmt.Sprintf("error reload processing orders: %v\n", err))
+		return nil, fmt.Errorf("error reload processing orders: %v\n", err)
 	}
 
 	return orders, nil

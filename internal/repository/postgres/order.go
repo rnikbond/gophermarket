@@ -79,6 +79,10 @@ func (pg Order) GetByStatuses(statuses []string) (map[int64]string, error) {
 		orders[orderNum] = status
 	}
 
+	if rowsErr := rows.Err(); rowsErr != nil {
+		return nil, rowsErr
+	}
+
 	return orders, nil
 }
 

@@ -27,7 +27,7 @@ func (o AccrualOrder) String() string {
 	builder := strings.Builder{}
 	builder.WriteString(fmt.Sprintf("Order  : %s\n", o.Order))
 	builder.WriteString(fmt.Sprintf("Status : %s\n", o.Status))
-	builder.WriteString(fmt.Sprintf("Accrual: %d\n", o.Accrual))
+	builder.WriteString(fmt.Sprintf("Accrual: %f\n", o.Accrual))
 
 	return builder.String()
 }
