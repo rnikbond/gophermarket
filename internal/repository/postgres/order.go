@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"fmt"
 	"time"
 
 	"gophermarket/internal/repository"
@@ -122,13 +121,6 @@ func (pg Order) UserOrders(username string) ([]pkgOrder.InfoOrder, error) {
 		if errScan != nil {
 			return nil, errScan
 		}
-
-		fmt.Println(infoOrder.UploadedAt)
-
-		tmp, _ := time.Parse(time.RFC3339, infoOrder.UploadedAt)
-		infoOrder.UploadedAt = tmp.Format("2006-01-02T15:04:05-0700")
-
-		fmt.Println(infoOrder.UploadedAt)
 
 		infoOrders = append(infoOrders, infoOrder)
 	}
