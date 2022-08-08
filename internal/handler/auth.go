@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	market "gophermarket/internal"
@@ -60,16 +61,19 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
+		log.Printf("SignUp :: Error unmarshal %s to User struct\n", r.Body)
 		return
 	}
 
 	errSignUp := h.services.Auth.SignUp(user)
 	if errSignUp != nil {
+		log.Printf("SignUp :: service return error: %v\n", errSignUp)
 		http.Error(w, errSignUp.Error(), pkg.ErrorHTTP(errSignUp))
 		return
 	}
 
 	if err := saveAuth(&w, h.GenerateJWT(user)); err != nil {
+		log.Printf("SignUp :: saveAuth return error: %v\n", errSignUp)
 		http.Error(w, err.Error(), pkg.ErrorHTTP(err))
 		return
 	}
