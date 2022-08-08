@@ -130,7 +130,7 @@ func (scan AccrualScanner) orderAccrualService(ctx context.Context, orderNum int
 
 	// TODO заюзать ctx
 
-	resp, errRequest := http.Get("http://" + scan.accrualAddr + "/api/orders/" + strconv.FormatInt(orderNum, 10))
+	resp, errRequest := http.Get(scan.accrualAddr + "/api/orders/" + strconv.FormatInt(orderNum, 10))
 	if errRequest != nil {
 		return pkgOrder.AccrualOrder{}, errRequest
 	}
