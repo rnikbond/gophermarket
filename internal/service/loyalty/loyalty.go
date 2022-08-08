@@ -52,6 +52,9 @@ func (service Loyalty) Balance(username string) (gophermarket.Balance, error) {
 		return gophermarket.Balance{}, nil
 	}
 
+	current = current / 100
+	used = used / 100
+
 	return gophermarket.Balance{
 		Accrual:   current,
 		Withdrawn: used,
