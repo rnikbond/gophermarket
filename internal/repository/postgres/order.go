@@ -124,7 +124,9 @@ func (pg Order) UserOrders(username string) ([]pkgOrder.InfoOrder, error) {
 		if errScan != nil {
 			return nil, errScan
 		}
+
 		infoOrder.Order = strconv.FormatInt(orderNum, 10)
+		infoOrder.Accrual = infoOrder.Accrual / 100
 
 		infoOrders = append(infoOrders, infoOrder)
 	}
