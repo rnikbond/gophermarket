@@ -38,7 +38,7 @@ func (l Loyalty) HowMatchAvailable(username string) (float64, error) {
 		return 0, nil
 	}
 
-	accrualsSum := float64(accrualsUser / 100)
+	accrualsSum := float64(accrualsUser) / 100
 	l.logger.Err.Printf("get accruals sum %f for user %s\n", accrualsSum, username)
 
 	return accrualsSum, nil
@@ -59,7 +59,7 @@ func (l Loyalty) HowMatchUsed(username string) (float64, error) {
 func (l Loyalty) SetAccrual(order int64, accrual float64) error {
 
 	accrualRound := int64(accrual * 100)
-	l.logger.Err.Printf("set accrual %d for order %d\n", accrualRound, accrual)
+	l.logger.Err.Printf("set accrual %d for order %d\n", accrualRound, order)
 	_, err := l.db.Exec(queryUpdateAccrual, accrualRound, order)
 	return err
 }
