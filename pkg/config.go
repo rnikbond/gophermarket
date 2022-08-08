@@ -53,9 +53,6 @@ func (cfg *Config) ReadEnvVars() {
 
 	// Убираем пробелы из адреса
 	cfg.Address = strings.TrimSpace(cfg.Address)
-
-	fmt.Println(*cfg)
-
 }
 
 // ParseFlags - Разбор аргументов командной строки

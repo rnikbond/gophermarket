@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -154,8 +153,6 @@ func (scan AccrualScanner) orderAccrualService(ctx context.Context, orderNum int
 	if err := json.Unmarshal(data, &orderAccrual); err != nil {
 		return pkgOrder.AccrualOrder{}, err
 	}
-
-	fmt.Println(orderAccrual)
 
 	if len(orderAccrual.Status) < 1 {
 		return pkgOrder.AccrualOrder{}, errors.New("accrual service returned empty status")
