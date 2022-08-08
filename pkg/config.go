@@ -63,7 +63,7 @@ func (cfg *Config) ParseFlags() error {
 	flag.StringVar(&cfg.TokenKey, "t", "secretKeyJWT", "string - secret key JWT")
 	flag.StringVar(&cfg.PasswordSalt, "s", "salt-salt-salt", "string - password salt")
 
-	addr := flag.String("a", "localhost:8001", "string - host:port")
+	addr := flag.String("a", "localhost:8080", "string - host:port")
 	flag.Parse()
 
 	if addr == nil || *addr == "" {
