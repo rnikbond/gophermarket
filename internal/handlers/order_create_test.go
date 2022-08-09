@@ -124,6 +124,9 @@ func TestHandler_CreateOrder(t *testing.T) {
 			handler.CreateOrder(w, request)
 
 			response := w.Result()
+			errBody := response.Body.Close()
+			assert.NoError(t, errBody)
+
 			assert.Equal(t, response.StatusCode, tt.want.status)
 		})
 	}
