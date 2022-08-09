@@ -4,8 +4,6 @@ import (
 	"log"
 	"time"
 
-	market "gophermarket/internal"
-
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -14,17 +12,17 @@ type Token struct {
 	jwt.StandardClaims
 }
 
-func (h *Handler) GenerateJWT(user market.User) string {
+func GenerateJWT(username, secretKey string) string {
 
 	var tokenClaim = Token{
-		Username: user.Username,
+		Username: username,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(10 * time.Minute).Unix(),
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenClaim)
-	tokenString, err := token.SignedString([]byte(h.tokenKey))
+	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,10 +30,10 @@ func (h *Handler) GenerateJWT(user market.User) string {
 	return tokenString
 }
 
-func (h *Handler) VerifyJWT(bearerToken string) (*jwt.Token, error) {
+func VerifyJWT(bearerToken, secretKey string) (*jwt.Token, error) {
 
 	token, err := jwt.ParseWithClaims(bearerToken, &Token{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(h.tokenKey), nil
+		return []byte(secretKey), nil
 	})
 
 	return token, err

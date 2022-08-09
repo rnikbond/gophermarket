@@ -16,7 +16,7 @@ func (h *Handler) VerifyUser(next http.Handler) http.Handler {
 		}
 
 		bearerToken := cookie.Value
-		token, errJWT := h.VerifyJWT(bearerToken)
+		token, errJWT := VerifyJWT(bearerToken, h.tokenKey)
 		if errJWT != nil || !token.Valid {
 			http.Error(w, pkg.ErrUserUnauthorized.Error(), pkg.ErrorHTTP(pkg.ErrUserUnauthorized))
 			return

@@ -35,7 +35,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := saveAuth(&w, h.GenerateJWT(user)); err != nil {
+	if err := saveAuth(&w, GenerateJWT(user.Username, h.tokenKey)); err != nil {
 		http.Error(w, err.Error(), pkg.ErrorHTTP(err))
 		return
 	}

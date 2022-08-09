@@ -37,7 +37,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := saveAuth(&w, h.GenerateJWT(user)); err != nil {
+	if err := saveAuth(&w, GenerateJWT(user.Username, h.tokenKey)); err != nil {
 		log.Printf("SignUp :: saveAuth return error: %v\n", errSignUp)
 		http.Error(w, err.Error(), pkg.ErrorHTTP(err))
 		return
