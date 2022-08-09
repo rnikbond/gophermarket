@@ -47,12 +47,12 @@ func (service Loyalty) Balance(ctx context.Context, username string) (gophermark
 
 	current, err := service.HowMatchAvailable(ctx, username)
 	if err != nil {
-		return gophermarket.Balance{}, nil
+		return gophermarket.Balance{}, err
 	}
 
 	used, err := service.HowMatchUsed(ctx, username)
 	if err != nil {
-		return gophermarket.Balance{}, nil
+		return gophermarket.Balance{}, err
 	}
 
 	return gophermarket.Balance{
