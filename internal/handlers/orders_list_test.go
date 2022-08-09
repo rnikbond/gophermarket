@@ -32,7 +32,6 @@ func TestHandler_OrdersList(t *testing.T) {
 	type args struct {
 		ctx         context.Context
 		username    string
-		token       string
 		userService bool
 	}
 
@@ -52,7 +51,6 @@ func TestHandler_OrdersList(t *testing.T) {
 			args: args{
 				ctx:         context.Background(),
 				username:    "user_test",
-				token:       GenerateJWT("user_test", tokenKey),
 				userService: true,
 			},
 			want: want{
@@ -78,7 +76,6 @@ func TestHandler_OrdersList(t *testing.T) {
 			args: args{
 				ctx:         context.Background(),
 				username:    "user_test",
-				token:       GenerateJWT("user_test", tokenKey),
 				userService: true,
 			},
 			want: want{
