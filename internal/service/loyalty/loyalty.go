@@ -1,3 +1,4 @@
+//go:generate mockgen -source loyalty.go -destination loyalty_mock.go -package loyalty
 package loyalty
 
 import (
