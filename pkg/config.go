@@ -22,7 +22,10 @@ type Config struct {
 
 func NewConfig() *Config {
 	cfg := Config{
-		Address: ":8080",
+		Address:        ":8080",
+		AccrualAddress: "http://localhost:8080",
+		TokenKey:       "tokenKeyJWT",
+		PasswordSalt:   "salt-salt-salt",
 	}
 
 	cfg.ReadEnvVars()

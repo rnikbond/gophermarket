@@ -2,11 +2,14 @@ package order
 
 import (
 	"context"
+	"strconv"
 
 	"gophermarket/internal/repository"
 	market "gophermarket/pkg"
 	"gophermarket/pkg/logpack"
 	"gophermarket/pkg/order"
+
+	"github.com/EClaesson/go-luhn"
 )
 
 type ServiceOrder interface {
@@ -28,7 +31,10 @@ func NewService(repo *repository.Repository, logger *logpack.LogPack) ServiceOrd
 
 func (or Order) Create(ctx context.Context, number int64, username string) error {
 
-	if !ValidOrder(number) {
+	if ok, err := luhn.IsValid(strconv.FormatInt(number, 10)); !ok || err != nil {
+		if err != nil {
+			or.logger.Err.Printf("could not validate order number: %s\n", err)
+		}
 		return market.ErrInvalidOrderNumber
 	}
 
