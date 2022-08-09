@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	market "gophermarket/internal"
-	"gophermarket/internal/repository"
 	"gophermarket/internal/service"
 	"gophermarket/internal/service/auth"
 	"gophermarket/pkg"
@@ -23,7 +22,6 @@ import (
 func TestHandler_SignIn(t *testing.T) {
 
 	const (
-		salt     = "ManyWivedJackLaughsAtProbesOfSexQuiz"
 		tokenKey = "PaintTheTownRed"
 	)
 
@@ -31,119 +29,126 @@ func TestHandler_SignIn(t *testing.T) {
 	defer ctrl.Finish()
 
 	type args struct {
+		ctx         context.Context
 		contentType string
 		user        market.User
-		wantStatus  int
-		callRepo    bool
-		errRepo     error
+		userService bool
 	}
+
+	type want struct {
+		status     int
+		errService error
+	}
+
 	tests := []struct {
 		name string
 		args args
+		want want
 	}{
 		{
 			name: "success sign up",
 			args: args{
+				ctx:         context.Background(),
 				contentType: "application/json",
 				user: market.User{
 					Username: "user",
 					Password: "hard_password",
 				},
-				wantStatus: http.StatusOK,
-				callRepo:   true,
-				errRepo:    nil,
+				userService: true,
+			},
+			want: want{
+				status:     http.StatusOK,
+				errService: nil,
 			},
 		},
 		{
 			name: "sign up existing user",
 			args: args{
+				ctx:         context.Background(),
 				contentType: "application/json",
 				user: market.User{
 					Username: "user",
 					Password: "hard_password",
 				},
-				wantStatus: http.StatusConflict,
-				callRepo:   true,
-				errRepo:    pkg.ErrUserAlreadyExists,
+				userService: true,
+			},
+			want: want{
+				status:     http.StatusConflict,
+				errService: pkg.ErrUserAlreadyExists,
 			},
 		},
 		{
 			name: "sign up empty auth data",
 			args: args{
+				ctx:         context.Background(),
 				contentType: "application/json",
-				wantStatus:  http.StatusBadRequest,
-				callRepo:    false,
-				errRepo:     nil,
+				userService: true,
+			},
+			want: want{
+				status:     http.StatusBadRequest,
+				errService: pkg.ErrEmptyAuthData,
 			},
 		},
 		{
 			name: "sign up empty auth login",
 			args: args{
+				ctx:         context.Background(),
 				contentType: "application/json",
 				user: market.User{
 					Username: "user",
 				},
-				wantStatus: http.StatusBadRequest,
-				callRepo:   false,
-				errRepo:    nil,
+				userService: true,
+			},
+			want: want{
+				status:     http.StatusBadRequest,
+				errService: pkg.ErrEmptyAuthData,
 			},
 		},
 		{
 			name: "sign up empty auth password",
 			args: args{
+				ctx:         context.Background(),
 				contentType: "application/json",
 				user: market.User{
 					Password: "hard_password",
 				},
-				wantStatus: http.StatusBadRequest,
-				callRepo:   false,
-				errRepo:    nil,
+				userService: true,
+			},
+			want: want{
+				status:     http.StatusBadRequest,
+				errService: pkg.ErrEmptyAuthData,
 			},
 		},
 		{
 			name: "sign up invalid content-type",
 			args: args{
-				contentType: "text/json",
+				ctx:         context.Background(),
+				contentType: "text/plain",
 				user: market.User{
+					Username: "user",
 					Password: "hard_password",
 				},
-				wantStatus: http.StatusUnsupportedMediaType,
-				callRepo:   false,
-				errRepo:    nil,
+				userService: false,
+			},
+			want: want{
+				status:     http.StatusUnsupportedMediaType,
+				errService: nil,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			ctx := context.Background()
+			authServiceMock := auth.NewMockServiceAuth(ctrl)
 
-			authRepoMock := repository.NewMockAuthorization(ctrl)
-			mockRepo := repository.Repository{
-				Authorization: authRepoMock,
+			if tt.args.userService {
+				authServiceMock.EXPECT().SignIn(tt.args.ctx, tt.args.user).Return(tt.want.errService)
 			}
 
-			if tt.args.callRepo {
-
-				userRepo := market.User{
-					Username: tt.args.user.Username,
-					Password: tt.args.user.Password,
-				}
-
-				if len(tt.args.user.Password) > 0 {
-					hash, err := pkg.GeneratePasswordHash(tt.args.user.Password, salt)
-					require.NoError(t, err)
-
-					userRepo.Password = hash
-				}
-
-				authRepoMock.EXPECT().ID(ctx, userRepo).Return(int64(0), tt.args.errRepo)
-			}
-
-			authService := auth.NewService(&mockRepo, salt, logpack.NewLogger())
 			services := service.Service{
-				Auth: authService,
+				Auth: authServiceMock,
 			}
+
 			handlers := NewHandler(&services, tokenKey, logpack.NewLogger())
 
 			authBody, err := json.Marshal(tt.args.user)
@@ -159,7 +164,7 @@ func TestHandler_SignIn(t *testing.T) {
 			errClose := response.Body.Close()
 			assert.NoError(t, errClose)
 
-			assert.Equal(t, tt.args.wantStatus, response.StatusCode)
+			assert.Equal(t, tt.want.status, response.StatusCode)
 		})
 	}
 }
