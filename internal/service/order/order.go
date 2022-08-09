@@ -1,6 +1,8 @@
 package order
 
 import (
+	"context"
+
 	"gophermarket/internal/repository"
 	market "gophermarket/pkg"
 	"gophermarket/pkg/logpack"
@@ -8,8 +10,8 @@ import (
 )
 
 type ServiceOrder interface {
-	Create(number int64, username string) error
-	UserOrders(username string) ([]order.InfoOrder, error)
+	Create(ctx context.Context, number int64, username string) error
+	UserOrders(ctx context.Context, username string) ([]order.InfoOrder, error)
 }
 
 type Order struct {
@@ -24,15 +26,15 @@ func NewService(repo *repository.Repository, logger *logpack.LogPack) ServiceOrd
 	}
 }
 
-func (or Order) Create(number int64, username string) error {
+func (or Order) Create(ctx context.Context, number int64, username string) error {
 
 	if !ValidOrder(number) {
 		return market.ErrInvalidOrderNumber
 	}
 
-	return or.repo.Order.Create(number, username)
+	return or.repo.Order.Create(ctx, number, username)
 }
 
-func (or Order) UserOrders(username string) ([]order.InfoOrder, error) {
-	return or.repo.Order.UserOrders(username)
+func (or Order) UserOrders(ctx context.Context, username string) ([]order.InfoOrder, error) {
+	return or.repo.Order.UserOrders(ctx, username)
 }

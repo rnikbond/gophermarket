@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"context"
+
 	market "gophermarket/internal"
 	"gophermarket/internal/repository"
 	"gophermarket/pkg"
@@ -22,21 +24,21 @@ func NewAuthPostgres(db *sqlx.DB, logger *logpack.LogPack) repository.Authorizat
 }
 
 // Create Создание нового пользователя
-func (pg Authorization) Create(user market.User) error {
+func (pg Authorization) Create(ctx context.Context, user market.User) error {
 
-	if ok := pg.ExistsUsername(user.Username); ok {
+	if ok := pg.ExistsUsername(ctx, user.Username); ok {
 		return pkg.ErrUserAlreadyExists
 	}
 
-	if _, err := pg.db.Exec(queryCreateUser, user.Username, user.Password); err != nil {
+	if _, err := pg.db.ExecContext(ctx, queryCreateUser, user.Username, user.Password); err != nil {
 		return err
 	}
 	return nil
 }
 
 // ID Получение идентификатора пользователя
-func (pg Authorization) ID(user market.User) (int64, error) {
-	row := pg.db.QueryRow(queryGetUserID, user.Username, user.Password)
+func (pg Authorization) ID(ctx context.Context, user market.User) (int64, error) {
+	row := pg.db.QueryRowContext(ctx, queryGetUserID, user.Username, user.Password)
 
 	var userID int64
 	if err := row.Scan(&userID); err != nil {
@@ -47,8 +49,8 @@ func (pg Authorization) ID(user market.User) (int64, error) {
 }
 
 // ExistsUsername Проверка существования имени пользователя
-func (pg Authorization) ExistsUsername(username string) bool {
-	row := pg.db.QueryRow(queryGetUserIDByName, username)
+func (pg Authorization) ExistsUsername(ctx context.Context, username string) bool {
+	row := pg.db.QueryRowContext(ctx, queryGetUserIDByName, username)
 
 	var userID int64
 	if err := row.Scan(&userID); err != nil {

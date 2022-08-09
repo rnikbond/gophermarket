@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -115,6 +116,8 @@ func TestHandler_SignIn(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
+			ctx := context.Background()
+
 			authRepoMock := repository.NewMockAuthorization(ctrl)
 			mockRepo := repository.Repository{
 				Authorization: authRepoMock,
@@ -134,7 +137,7 @@ func TestHandler_SignIn(t *testing.T) {
 					userRepo.Password = hash
 				}
 
-				authRepoMock.EXPECT().ID(userRepo).Return(int64(0), tt.args.errRepo)
+				authRepoMock.EXPECT().ID(ctx, userRepo).Return(int64(0), tt.args.errRepo)
 			}
 
 			authService := auth.NewService(&mockRepo, salt, logpack.NewLogger())

@@ -30,7 +30,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errSignUp := h.services.Auth.SignUp(user)
+	errSignUp := h.services.Auth.SignUp(r.Context(), user)
 	if errSignUp != nil {
 		log.Printf("SignUp :: service return error: %v\n", errSignUp)
 		http.Error(w, errSignUp.Error(), pkg.ErrorHTTP(errSignUp))

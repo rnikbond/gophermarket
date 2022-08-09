@@ -39,7 +39,7 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errOrder := h.services.Order.Create(order, username)
+	errOrder := h.services.Order.Create(r.Context(), order, username)
 	if errOrder == nil {
 		w.WriteHeader(http.StatusAccepted)
 		return

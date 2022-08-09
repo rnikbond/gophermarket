@@ -17,7 +17,7 @@ func (h *Handler) Balance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	balance, err := h.services.Loyalty.Balance(username)
+	balance, err := h.services.Loyalty.Balance(r.Context(), username)
 	if err != nil {
 		w.WriteHeader(pkg.ErrorHTTP(err))
 		return

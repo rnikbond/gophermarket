@@ -18,7 +18,7 @@ func (h *Handler) OrdersList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orders, err := h.services.Order.UserOrders(username)
+	orders, err := h.services.Order.UserOrders(r.Context(), username)
 	if err != nil {
 		log.Printf("OrdersList :: error get user orders list: %v\n", err)
 		w.WriteHeader(pkg.ErrorHTTP(err))

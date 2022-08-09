@@ -29,7 +29,7 @@ func (h *Handler) SignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	errSignIn := h.services.Auth.SignIn(user)
+	errSignIn := h.services.Auth.SignIn(r.Context(), user)
 	if errSignIn != nil {
 		http.Error(w, errSignIn.Error(), pkg.ErrorHTTP(errSignIn))
 		return

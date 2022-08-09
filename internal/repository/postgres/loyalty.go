@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	"context"
+
 	"gophermarket/internal/repository"
 	market "gophermarket/pkg"
 	"gophermarket/pkg/logpack"
@@ -20,10 +22,10 @@ func NewLoyaltyPostgres(db *sqlx.DB, logger *logpack.LogPack) repository.Loyalty
 	}
 }
 
-func (l Loyalty) HowMatchAvailable(username string) (float64, error) {
+func (l Loyalty) HowMatchAvailable(ctx context.Context, username string) (float64, error) {
 
 	var userID int64
-	row := l.db.QueryRow(queryGetUserIDByName, username)
+	row := l.db.QueryRowContext(ctx, queryGetUserIDByName, username)
 	if err := row.Scan(&userID); err != nil {
 		return 0, market.ErrUserNotFound
 	}
@@ -41,10 +43,10 @@ func (l Loyalty) HowMatchAvailable(username string) (float64, error) {
 	return float64(accrualsUser) / 100, nil
 }
 
-func (l Loyalty) HowMatchUsed(username string) (float64, error) {
+func (l Loyalty) HowMatchUsed(ctx context.Context, username string) (float64, error) {
 
 	var userID int64
-	row := l.db.QueryRow(queryGetUserIDByName, username)
+	row := l.db.QueryRowContext(ctx, queryGetUserIDByName, username)
 	if err := row.Scan(&userID); err != nil {
 		return 0, market.ErrUserNotFound
 	}
@@ -53,9 +55,9 @@ func (l Loyalty) HowMatchUsed(username string) (float64, error) {
 }
 
 // SetAccrual - Изменение начислений по заказу
-func (l Loyalty) SetAccrual(order int64, accrual float64) error {
+func (l Loyalty) SetAccrual(ctx context.Context, order int64, accrual float64) error {
 
 	accrualRound := int64(accrual * 100)
-	_, err := l.db.Exec(queryUpdateAccrual, accrualRound, order)
+	_, err := l.db.ExecContext(ctx, queryUpdateAccrual, accrualRound, order)
 	return err
 }

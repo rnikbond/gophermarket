@@ -1,16 +1,18 @@
 package loyalty
 
 import (
+	"context"
+
 	gophermarket "gophermarket/internal"
 	"gophermarket/internal/repository"
 	"gophermarket/pkg/logpack"
 )
 
 type ServiceLoyalty interface {
-	HowMatchAvailable(username string) (float64, error)
-	HowMatchUsed(username string) (float64, error)
-	SetAccrual(order int64, accrual float64) error
-	Balance(username string) (gophermarket.Balance, error)
+	HowMatchAvailable(ctx context.Context, username string) (float64, error)
+	HowMatchUsed(ctx context.Context, username string) (float64, error)
+	SetAccrual(ctx context.Context, order int64, accrual float64) error
+	Balance(ctx context.Context, username string) (gophermarket.Balance, error)
 }
 
 type Loyalty struct {
@@ -25,29 +27,29 @@ func NewService(repo *repository.Repository, logger *logpack.LogPack) ServiceLoy
 	}
 }
 
-func (service Loyalty) HowMatchAvailable(username string) (float64, error) {
+func (service Loyalty) HowMatchAvailable(ctx context.Context, username string) (float64, error) {
 
-	return service.repo.Loyalty.HowMatchAvailable(username)
+	return service.repo.Loyalty.HowMatchAvailable(ctx, username)
 }
 
-func (service Loyalty) HowMatchUsed(username string) (float64, error) {
+func (service Loyalty) HowMatchUsed(ctx context.Context, username string) (float64, error) {
 
-	return service.repo.Loyalty.HowMatchUsed(username)
+	return service.repo.Loyalty.HowMatchUsed(ctx, username)
 }
 
-func (service Loyalty) SetAccrual(order int64, accrual float64) error {
+func (service Loyalty) SetAccrual(ctx context.Context, order int64, accrual float64) error {
 
-	return service.repo.Loyalty.SetAccrual(order, accrual)
+	return service.repo.Loyalty.SetAccrual(ctx, order, accrual)
 }
 
-func (service Loyalty) Balance(username string) (gophermarket.Balance, error) {
+func (service Loyalty) Balance(ctx context.Context, username string) (gophermarket.Balance, error) {
 
-	current, err := service.HowMatchAvailable(username)
+	current, err := service.HowMatchAvailable(ctx, username)
 	if err != nil {
 		return gophermarket.Balance{}, nil
 	}
 
-	used, err := service.HowMatchUsed(username)
+	used, err := service.HowMatchUsed(ctx, username)
 	if err != nil {
 		return gophermarket.Balance{}, nil
 	}

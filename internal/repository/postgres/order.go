@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"context"
 	"strconv"
 	"time"
 
@@ -26,10 +27,10 @@ func NewOrderPostgres(db *sqlx.DB, logger *logpack.LogPack) repository.Order {
 }
 
 // Create - Создание нового заказа
-func (pg Order) Create(number int64, username string) error {
+func (pg Order) Create(ctx context.Context, number int64, username string) error {
 
 	var userID int64
-	row := pg.db.QueryRow(queryGetUserIDByName, username)
+	row := pg.db.QueryRowContext(ctx, queryGetUserIDByName, username)
 	if err := row.Scan(&userID); err != nil {
 		return market.ErrUserNotFound
 	}
@@ -54,10 +55,9 @@ func (pg Order) Create(number int64, username string) error {
 	return err
 }
 
-// GetByStatuses - Получение заказов с запрашиваемым статусом
-func (pg Order) GetByStatuses(statuses []string) (map[int64]string, error) {
+func (pg Order) GetByStatuses(ctx context.Context, statuses []string) (map[int64]string, error) {
 
-	rows, err := pg.db.Query(queryOrdersByStatuses, pq.Array(&statuses))
+	rows, err := pg.db.QueryxContext(ctx, queryOrdersByStatuses, pq.Array(&statuses))
 	if err != nil {
 		return nil, err
 	}
@@ -89,21 +89,21 @@ func (pg Order) GetByStatuses(statuses []string) (map[int64]string, error) {
 }
 
 // SetStatus - Изменение статуса заказа
-func (pg Order) SetStatus(order int64, status string) error {
+func (pg Order) SetStatus(ctx context.Context, order int64, status string) error {
 
-	_, err := pg.db.Exec(queryUpdateOrder, status, order)
+	_, err := pg.db.ExecContext(ctx, queryUpdateOrder, status, order)
 	return err
 }
 
-func (pg Order) UserOrders(username string) ([]pkgOrder.InfoOrder, error) {
+func (pg Order) UserOrders(ctx context.Context, username string) ([]pkgOrder.InfoOrder, error) {
 
 	var userID int64
-	row := pg.db.QueryRow(queryGetUserIDByName, username)
+	row := pg.db.QueryRowContext(ctx, queryGetUserIDByName, username)
 	if err := row.Scan(&userID); err != nil {
 		return nil, market.ErrUserNotFound
 	}
 
-	rows, err := pg.db.Query(queryUserOrders, userID)
+	rows, err := pg.db.QueryContext(ctx, queryUserOrders, userID)
 	if err != nil {
 		return nil, err
 	}
