@@ -7,7 +7,7 @@ package repository
 import (
 	context "context"
 	gophermarket "gophermarket/internal"
-	order "gophermarket/pkg/order"
+	pkg "gophermarket/pkg"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -146,10 +146,10 @@ func (mr *MockOrderMockRecorder) SetStatus(ctx, order, status interface{}) *gomo
 }
 
 // UserOrders mocks base method.
-func (m *MockOrder) UserOrders(ctx context.Context, username string) ([]order.InfoOrder, error) {
+func (m *MockOrder) UserOrders(ctx context.Context, username string) ([]pkg.OrderInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UserOrders", ctx, username)
-	ret0, _ := ret[0].([]order.InfoOrder)
+	ret0, _ := ret[0].([]pkg.OrderInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -213,6 +213,21 @@ func (mr *MockLoyaltyMockRecorder) HowMatchUsed(ctx, username interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HowMatchUsed", reflect.TypeOf((*MockLoyalty)(nil).HowMatchUsed), ctx, username)
 }
 
+// Payments mocks base method.
+func (m *MockLoyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Payments", ctx, username)
+	ret0, _ := ret[0].([]pkg.PaymentInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Payments indicates an expected call of Payments.
+func (mr *MockLoyaltyMockRecorder) Payments(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Payments", reflect.TypeOf((*MockLoyalty)(nil).Payments), ctx, username)
+}
+
 // SetAccrual mocks base method.
 func (m *MockLoyalty) SetAccrual(ctx context.Context, order int64, accrual float64) error {
 	m.ctrl.T.Helper()
@@ -225,19 +240,4 @@ func (m *MockLoyalty) SetAccrual(ctx context.Context, order int64, accrual float
 func (mr *MockLoyaltyMockRecorder) SetAccrual(ctx, order, accrual interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAccrual", reflect.TypeOf((*MockLoyalty)(nil).SetAccrual), ctx, order, accrual)
-}
-
-// WriteOffInfo mocks base method.
-func (m *MockLoyalty) WriteOffInfo(ctx context.Context, username string) ([]order.WriteOff, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WriteOffInfo", ctx, username)
-	ret0, _ := ret[0].([]order.WriteOff)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WriteOffInfo indicates an expected call of WriteOffInfo.
-func (mr *MockLoyaltyMockRecorder) WriteOffInfo(ctx, username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WriteOffInfo", reflect.TypeOf((*MockLoyalty)(nil).WriteOffInfo), ctx, username)
 }

@@ -7,8 +7,8 @@ import (
 	"gophermarket/pkg"
 )
 
-// WriteOffInfo - Обработчик запроса данных о списании балло
-func (h *Handler) WriteOffInfo(w http.ResponseWriter, r *http.Request) {
+// Payments - Обработчик запроса данных о списании баллов
+func (h *Handler) Payments(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -18,7 +18,7 @@ func (h *Handler) WriteOffInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	info, err := h.services.Loyalty.WriteOffInfo(r.Context(), username)
+	info, err := h.services.Loyalty.Payments(r.Context(), username)
 	if err != nil {
 		statusCode := pkg.ErrorHTTP(err)
 		if statusCode == http.StatusInternalServerError {

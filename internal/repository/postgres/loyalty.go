@@ -5,9 +5,8 @@ import (
 	"strconv"
 
 	"gophermarket/internal/repository"
-	market "gophermarket/pkg"
+	"gophermarket/pkg"
 	"gophermarket/pkg/logpack"
-	pkgOrder "gophermarket/pkg/order"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -29,7 +28,7 @@ func (l Loyalty) HowMatchAvailable(ctx context.Context, username string) (float6
 	var userID int64
 	row := l.db.QueryRowContext(ctx, queryGetUserIDByName, username)
 	if err := row.Scan(&userID); err != nil {
-		return 0, market.ErrUserNotFound
+		return 0, pkg.ErrUserNotFound
 	}
 
 	row = l.db.QueryRow(queryUserAccruals, userID)
@@ -52,7 +51,7 @@ func (l Loyalty) HowMatchUsed(ctx context.Context, username string) (float64, er
 	var userID int64
 	row := l.db.QueryRowContext(ctx, queryGetUserIDByName, username)
 	if err := row.Scan(&userID); err != nil {
-		return 0, market.ErrUserNotFound
+		return 0, pkg.ErrUserNotFound
 	}
 
 	row = l.db.QueryRow(queryUserWithdrawals, userID)
@@ -78,13 +77,13 @@ func (l Loyalty) SetAccrual(ctx context.Context, order int64, accrual float64) e
 	return err
 }
 
-// WriteOffInfo - Получение информации о списании
-func (l Loyalty) WriteOffInfo(ctx context.Context, username string) ([]pkgOrder.WriteOff, error) {
+// Payments - Получение информации о списании
+func (l Loyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
 
 	var userID int64
 	row := l.db.QueryRowContext(ctx, queryGetUserIDByName, username)
 	if err := row.Scan(&userID); err != nil {
-		return nil, market.ErrUserNotFound
+		return nil, pkg.ErrUserNotFound
 	}
 
 	rows, err := l.db.QueryContext(ctx, queryWithdrawalsInfo, userID)
@@ -98,14 +97,14 @@ func (l Loyalty) WriteOffInfo(ctx context.Context, username string) ([]pkgOrder.
 		}
 	}()
 
-	var writeOffInfo []pkgOrder.WriteOff
+	var paymentsInfo []pkg.PaymentInfo
 
 	for rows.Next() {
 
 		var orderNum int64
 		var withdrawal int64
 
-		var writeOff pkgOrder.WriteOff
+		var writeOff pkg.PaymentInfo
 
 		if err := rows.Scan(&orderNum, &withdrawal, &writeOff.UploadedAt); err != nil {
 			return nil, err
@@ -114,12 +113,12 @@ func (l Loyalty) WriteOffInfo(ctx context.Context, username string) ([]pkgOrder.
 		writeOff.OrderNum = strconv.FormatInt(orderNum, 10)
 		writeOff.Sum = float64(withdrawal) / 100
 
-		writeOffInfo = append(writeOffInfo, writeOff)
+		paymentsInfo = append(paymentsInfo, writeOff)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return writeOffInfo, nil
+	return paymentsInfo, nil
 }

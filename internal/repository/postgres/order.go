@@ -8,7 +8,6 @@ import (
 	"gophermarket/internal/repository"
 	market "gophermarket/pkg"
 	"gophermarket/pkg/logpack"
-	pkgOrder "gophermarket/pkg/order"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -57,7 +56,7 @@ func (pg Order) Create(ctx context.Context, number int64, username string, statu
 
 func (pg Order) CreateWithPayment(ctx context.Context, number int64, username string, sum float64) error {
 
-	if err := pg.Create(ctx, number, username, pkgOrder.StatusProcessed); err != nil {
+	if err := pg.Create(ctx, number, username, market.StatusProcessed); err != nil {
 		if err == market.ErrUserAlreadyOrderedIt {
 			return market.ErrOrderAlreadyExists
 		}
@@ -109,7 +108,7 @@ func (pg Order) SetStatus(ctx context.Context, order int64, status string) error
 	return err
 }
 
-func (pg Order) UserOrders(ctx context.Context, username string) ([]pkgOrder.InfoOrder, error) {
+func (pg Order) UserOrders(ctx context.Context, username string) ([]market.OrderInfo, error) {
 
 	var userID int64
 	row := pg.db.QueryRowContext(ctx, queryGetUserIDByName, username)
@@ -128,10 +127,10 @@ func (pg Order) UserOrders(ctx context.Context, username string) ([]pkgOrder.Inf
 		}
 	}()
 
-	var infoOrders []pkgOrder.InfoOrder
+	var infoOrders []market.OrderInfo
 
 	for rows.Next() {
-		var infoOrder pkgOrder.InfoOrder
+		var infoOrder market.OrderInfo
 		var orderNum int64
 
 		errScan := rows.Scan(&orderNum, &infoOrder.Status, &infoOrder.Accrual, &infoOrder.UploadedAt)

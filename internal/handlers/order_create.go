@@ -9,6 +9,7 @@ import (
 	market "gophermarket/pkg"
 )
 
+// CreateOrder Обработчик запроса на создание заказа
 func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	if r.Header.Get("Content-Type") != "text/plain" {
@@ -52,7 +53,7 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// CreateWithPay - ќбработчик запроса на создание заказа со списанием баллов
+// CreateWithPay - обработчик запроса на создание заказа со списанием баллов
 func (h *Handler) CreateWithPay(w http.ResponseWriter, r *http.Request) {
 
 	if r.Header.Get("Content-Type") != "application/json" {
@@ -78,10 +79,7 @@ func (h *Handler) CreateWithPay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	orderPay := struct {
-		Order string  `json:"order"`
-		Sum   float64 `json:"sum"`
-	}{}
+	var orderPay market.OrderWithPay
 
 	if err := json.Unmarshal(data, &orderPay); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

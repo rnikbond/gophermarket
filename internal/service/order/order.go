@@ -1,4 +1,4 @@
-//go:generate mockgen -source order.go -destination order_mock.go -package order
+//go:generate mockgen -source variant.go -destination order_mock.go -package order
 package order
 
 import (
@@ -6,9 +6,8 @@ import (
 	"strconv"
 
 	"gophermarket/internal/repository"
-	market "gophermarket/pkg"
+	"gophermarket/pkg"
 	"gophermarket/pkg/logpack"
-	"gophermarket/pkg/order"
 
 	"github.com/EClaesson/go-luhn"
 )
@@ -16,7 +15,7 @@ import (
 type ServiceOrder interface {
 	Create(ctx context.Context, number int64, username string) error
 	CreateWithPayment(ctx context.Context, number int64, username string, sum float64) error
-	UserOrders(ctx context.Context, username string) ([]order.InfoOrder, error)
+	UserOrders(ctx context.Context, username string) ([]pkg.OrderInfo, error)
 }
 
 type Order struct {
@@ -37,10 +36,10 @@ func (or Order) Create(ctx context.Context, number int64, username string) error
 		if err != nil {
 			or.logger.Err.Printf("could not validate order number: %s\n", err)
 		}
-		return market.ErrInvalidOrderNumber
+		return pkg.ErrInvalidOrderNumber
 	}
 
-	return or.repo.Order.Create(ctx, number, username, order.StatusNew)
+	return or.repo.Order.Create(ctx, number, username, pkg.StatusNew)
 }
 
 func (or Order) CreateWithPayment(ctx context.Context, number int64, username string, sum float64) error {
@@ -49,7 +48,7 @@ func (or Order) CreateWithPayment(ctx context.Context, number int64, username st
 		if err != nil {
 			or.logger.Err.Printf("could not validate order number: %s\n", err)
 		}
-		return market.ErrInvalidOrderNumber
+		return pkg.ErrInvalidOrderNumber
 	}
 
 	current, errCurrent := or.repo.Loyalty.HowMatchAvailable(ctx, username)
@@ -62,14 +61,13 @@ func (or Order) CreateWithPayment(ctx context.Context, number int64, username st
 		return errCurrent
 	}
 
-	current -= used
-	if current < sum {
-		return market.ErrPaymentNotAvailable
+	if (current - used) < sum {
+		return pkg.ErrPaymentNotAvailable
 	}
 
 	return or.repo.Order.CreateWithPayment(ctx, number, username, sum)
 }
 
-func (or Order) UserOrders(ctx context.Context, username string) ([]order.InfoOrder, error) {
+func (or Order) UserOrders(ctx context.Context, username string) ([]pkg.OrderInfo, error) {
 	return or.repo.Order.UserOrders(ctx, username)
 }

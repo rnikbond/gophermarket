@@ -7,7 +7,7 @@ package loyalty
 import (
 	context "context"
 	gophermarket "gophermarket/internal"
-	order "gophermarket/pkg/order"
+	pkg "gophermarket/pkg"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -81,6 +81,21 @@ func (mr *MockServiceLoyaltyMockRecorder) HowMatchUsed(ctx, username interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HowMatchUsed", reflect.TypeOf((*MockServiceLoyalty)(nil).HowMatchUsed), ctx, username)
 }
 
+// Payments mocks base method.
+func (m *MockServiceLoyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Payments", ctx, username)
+	ret0, _ := ret[0].([]pkg.PaymentInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Payments indicates an expected call of Payments.
+func (mr *MockServiceLoyaltyMockRecorder) Payments(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Payments", reflect.TypeOf((*MockServiceLoyalty)(nil).Payments), ctx, username)
+}
+
 // SetAccrual mocks base method.
 func (m *MockServiceLoyalty) SetAccrual(ctx context.Context, order int64, accrual float64) error {
 	m.ctrl.T.Helper()
@@ -93,19 +108,4 @@ func (m *MockServiceLoyalty) SetAccrual(ctx context.Context, order int64, accrua
 func (mr *MockServiceLoyaltyMockRecorder) SetAccrual(ctx, order, accrual interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAccrual", reflect.TypeOf((*MockServiceLoyalty)(nil).SetAccrual), ctx, order, accrual)
-}
-
-// WriteOffInfo mocks base method.
-func (m *MockServiceLoyalty) WriteOffInfo(ctx context.Context, username string) ([]order.WriteOff, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WriteOffInfo", ctx, username)
-	ret0, _ := ret[0].([]order.WriteOff)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WriteOffInfo indicates an expected call of WriteOffInfo.
-func (mr *MockServiceLoyaltyMockRecorder) WriteOffInfo(ctx, username interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WriteOffInfo", reflect.TypeOf((*MockServiceLoyalty)(nil).WriteOffInfo), ctx, username)
 }

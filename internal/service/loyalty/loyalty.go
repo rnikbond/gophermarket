@@ -7,8 +7,8 @@ import (
 
 	gophermarket "gophermarket/internal"
 	"gophermarket/internal/repository"
+	"gophermarket/pkg"
 	"gophermarket/pkg/logpack"
-	"gophermarket/pkg/order"
 )
 
 type ServiceLoyalty interface {
@@ -16,7 +16,7 @@ type ServiceLoyalty interface {
 	HowMatchUsed(ctx context.Context, username string) (float64, error)
 	SetAccrual(ctx context.Context, order int64, accrual float64) error
 	Balance(ctx context.Context, username string) (gophermarket.Balance, error)
-	WriteOffInfo(ctx context.Context, username string) ([]order.WriteOff, error)
+	Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error)
 }
 
 type Loyalty struct {
@@ -71,6 +71,6 @@ func (service Loyalty) Balance(ctx context.Context, username string) (gophermark
 	}, nil
 }
 
-func (service Loyalty) WriteOffInfo(ctx context.Context, username string) ([]order.WriteOff, error) {
-	return service.repo.Loyalty.WriteOffInfo(ctx, username)
+func (service Loyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
+	return service.repo.Loyalty.Payments(ctx, username)
 }
