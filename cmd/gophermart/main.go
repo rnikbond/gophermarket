@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"gophermarket/internal/repository"
 	"gophermarket/internal/repository/postgres"
@@ -30,7 +31,7 @@ func main() {
 
 	db := PostgresDB(cfg.DatabaseURI, logger)
 	pgRepo := PostgresRepository(db, logger)
-	loyalty := LoyaltyTask(cfg.AccrualAddress, pgRepo, logger)
+	loyalty := LoyaltyTask(cfg.AccrualAddress, pgRepo, cfg.IntervalScan, logger)
 	services := service.NewServices(pgRepo, cfg.PasswordSalt, logger)
 	handler := handlers.NewHandler(services, cfg.TokenKey, logger)
 	server := new(market.Server)
@@ -47,9 +48,7 @@ func main() {
 	}()
 
 	// Запуск задачи для обновления статусов и балло из системы лояльности
-	if err := loyalty.Scan(ctx); err != nil {
-		logger.Fatal.Fatalf("could not run loyalty scanner task: %s\n", err)
-	}
+	loyalty.Scan(ctx)
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -105,7 +104,7 @@ func PostgresRepository(db *sqlx.DB, logger *logpack.LogPack) *repository.Reposi
 	return repo
 }
 
-func LoyaltyTask(loyaltyAddr string, repo *repository.Repository, logger *logpack.LogPack) tasks.LoyaltyTask {
+func LoyaltyTask(loyaltyAddr string, repo *repository.Repository, interval time.Duration, logger *logpack.LogPack) tasks.LoyaltyTask {
 
-	return tasks.NewScanner(loyaltyAddr, repo, logger)
+	return tasks.NewScanner(loyaltyAddr, repo, interval, logger)
 }

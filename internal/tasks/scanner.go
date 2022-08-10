@@ -15,7 +15,7 @@ import (
 )
 
 type LoyaltyTask interface {
-	Scan(ctx context.Context) error
+	Scan(ctx context.Context)
 }
 
 type LoyaltyScanner struct {
@@ -23,36 +23,40 @@ type LoyaltyScanner struct {
 	logger     *logpack.LogPack
 	repository *repository.Repository
 	client     *http.Client
+	interval   time.Duration
 }
 
-func NewScanner(addr string, repo *repository.Repository, logger *logpack.LogPack) LoyaltyTask {
+func NewScanner(addr string, repo *repository.Repository, interval time.Duration, logger *logpack.LogPack) LoyaltyTask {
 	return &LoyaltyScanner{
 		addr:       addr,
 		repository: repo,
 		logger:     logger,
 		client:     http.DefaultClient,
+		interval:   interval,
 	}
 }
 
-func (scan LoyaltyScanner) Scan(ctx context.Context) error {
+func (scan LoyaltyScanner) Scan(ctx context.Context) {
 
-	ticker := time.NewTicker(1 * time.Second)
+	ticker := time.NewTicker(scan.interval)
 
-	for {
-		select {
-		case <-ticker.C:
-			orders, errReload := scan.reloadOrders(ctx)
-			if errReload != nil {
-				scan.logger.Err.Printf("error reload orders from repository: %s\n", errReload)
-				continue
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				orders, errReload := scan.reloadOrders(ctx)
+				if errReload != nil {
+					scan.logger.Err.Printf("error reload orders from repository: %s\n", errReload)
+					continue
+				}
+
+				scan.updateOrderStatuses(ctx, orders)
+
+			case <-ctx.Done():
+				return
 			}
-
-			scan.updateOrderStatuses(ctx, orders)
-
-		case <-ctx.Done():
-			return nil
 		}
-	}
+	}()
 }
 
 // updateOrderStatuses - Обновление статусов заказов в репозитории
@@ -160,7 +164,7 @@ func (scan LoyaltyScanner) orderAccrualService(ctx context.Context, orderNum int
 		return pkgOrder.AccrualOrder{}, err
 	}
 
-	if len(orderAccrual.Status) < 1 {
+	if len(orderAccrual.Status) == 0 {
 		return pkgOrder.AccrualOrder{}, errors.New("accrual service returned empty status")
 	}
 

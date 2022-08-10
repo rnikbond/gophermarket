@@ -25,7 +25,7 @@ func (h *Handler) OrdersList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(orders) < 1 {
+	if len(orders) == 0 {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
