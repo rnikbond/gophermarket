@@ -30,6 +30,12 @@ type InfoOrder struct {
 	UploadedAt string  `json:"uploaded_at"`
 }
 
+type WriteOff struct {
+	OrderNum   string  `json:"order"`
+	Sum        float64 `json:"sum"`
+	UploadedAt string  `json:"processed_at"`
+}
+
 func (o AccrualOrder) String() string {
 	builder := strings.Builder{}
 	builder.WriteString(fmt.Sprintf("Order  : %s\n", o.Order))

@@ -7,6 +7,7 @@ package loyalty
 import (
 	context "context"
 	gophermarket "gophermarket/internal"
+	order "gophermarket/pkg/order"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -92,4 +93,19 @@ func (m *MockServiceLoyalty) SetAccrual(ctx context.Context, order int64, accrua
 func (mr *MockServiceLoyaltyMockRecorder) SetAccrual(ctx, order, accrual interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAccrual", reflect.TypeOf((*MockServiceLoyalty)(nil).SetAccrual), ctx, order, accrual)
+}
+
+// WriteOffInfo mocks base method.
+func (m *MockServiceLoyalty) WriteOffInfo(ctx context.Context, username string) ([]order.WriteOff, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WriteOffInfo", ctx, username)
+	ret0, _ := ret[0].([]order.WriteOff)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WriteOffInfo indicates an expected call of WriteOffInfo.
+func (mr *MockServiceLoyaltyMockRecorder) WriteOffInfo(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WriteOffInfo", reflect.TypeOf((*MockServiceLoyalty)(nil).WriteOffInfo), ctx, username)
 }

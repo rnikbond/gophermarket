@@ -89,17 +89,31 @@ func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockOrder) Create(ctx context.Context, number int64, username string) error {
+func (m *MockOrder) Create(ctx context.Context, number int64, username, status string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, number, username)
+	ret := m.ctrl.Call(m, "Create", ctx, number, username, status)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockOrderMockRecorder) Create(ctx, number, username interface{}) *gomock.Call {
+func (mr *MockOrderMockRecorder) Create(ctx, number, username, status interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOrder)(nil).Create), ctx, number, username)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOrder)(nil).Create), ctx, number, username, status)
+}
+
+// CreateWithPayment mocks base method.
+func (m *MockOrder) CreateWithPayment(ctx context.Context, number int64, username string, sum float64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateWithPayment", ctx, number, username, sum)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateWithPayment indicates an expected call of CreateWithPayment.
+func (mr *MockOrderMockRecorder) CreateWithPayment(ctx, number, username, sum interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWithPayment", reflect.TypeOf((*MockOrder)(nil).CreateWithPayment), ctx, number, username, sum)
 }
 
 // GetByStatuses mocks base method.
@@ -211,4 +225,19 @@ func (m *MockLoyalty) SetAccrual(ctx context.Context, order int64, accrual float
 func (mr *MockLoyaltyMockRecorder) SetAccrual(ctx, order, accrual interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAccrual", reflect.TypeOf((*MockLoyalty)(nil).SetAccrual), ctx, order, accrual)
+}
+
+// WriteOffInfo mocks base method.
+func (m *MockLoyalty) WriteOffInfo(ctx context.Context, username string) ([]order.WriteOff, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WriteOffInfo", ctx, username)
+	ret0, _ := ret[0].([]order.WriteOff)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WriteOffInfo indicates an expected call of WriteOffInfo.
+func (mr *MockLoyaltyMockRecorder) WriteOffInfo(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WriteOffInfo", reflect.TypeOf((*MockLoyalty)(nil).WriteOffInfo), ctx, username)
 }

@@ -27,7 +27,7 @@ func NewOrderPostgres(db *sqlx.DB, logger *logpack.LogPack) repository.Order {
 }
 
 // Create - Создание нового заказа
-func (pg Order) Create(ctx context.Context, number int64, username string) error {
+func (pg Order) Create(ctx context.Context, number int64, username string, status string) error {
 
 	var userID int64
 	row := pg.db.QueryRowContext(ctx, queryGetUserIDByName, username)
@@ -51,7 +51,21 @@ func (pg Order) Create(ctx context.Context, number int64, username string) error
 
 	// Если дошли сюда - значит такого заказа еще не было - создаем
 
-	_, err := pg.db.Exec(queryCreateOrder, userID, number, pkgOrder.StatusNew, time.Now().Format("2006-01-02T15:04:05Z07:00"))
+	_, err := pg.db.Exec(queryCreateOrder, userID, number, status, time.Now().Format("2006-01-02T15:04:05Z07:00"))
+	return err
+}
+
+func (pg Order) CreateWithPayment(ctx context.Context, number int64, username string, sum float64) error {
+
+	if err := pg.Create(ctx, number, username, pkgOrder.StatusProcessed); err != nil {
+		if err == market.ErrUserAlreadyOrderedIt {
+			return market.ErrOrderAlreadyExists
+		}
+
+		return err
+	}
+
+	_, err := pg.db.Exec(queryChangeWithdrawals, int64(sum*100), number)
 	return err
 }
 

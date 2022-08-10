@@ -26,6 +26,7 @@ var (
 	ErrInvalidOrderNumber   = NewErr("invalid order number")
 	ErrOrderAlreadyExists   = NewErr("order number already exists")
 	ErrUserAlreadyOrderedIt = NewErr("user already ordered this order")
+	ErrPaymentNotAvailable  = NewErr("insufficient funds for payment")
 )
 
 var (
@@ -58,6 +59,9 @@ func ErrorHTTP(err error) int {
 
 	case ErrUserAlreadyOrderedIt:
 		return http.StatusOK
+
+	case ErrPaymentNotAvailable:
+		return http.StatusPaymentRequired
 
 	default:
 		return http.StatusInternalServerError

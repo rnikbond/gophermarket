@@ -49,6 +49,20 @@ func (mr *MockServiceOrderMockRecorder) Create(ctx, number, username interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockServiceOrder)(nil).Create), ctx, number, username)
 }
 
+// CreateWithPayment mocks base method.
+func (m *MockServiceOrder) CreateWithPayment(ctx context.Context, number int64, username string, sum float64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateWithPayment", ctx, number, username, sum)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateWithPayment indicates an expected call of CreateWithPayment.
+func (mr *MockServiceOrderMockRecorder) CreateWithPayment(ctx, number, username, sum interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWithPayment", reflect.TypeOf((*MockServiceOrder)(nil).CreateWithPayment), ctx, number, username, sum)
+}
+
 // UserOrders mocks base method.
 func (m *MockServiceOrder) UserOrders(ctx context.Context, username string) ([]order.InfoOrder, error) {
 	m.ctrl.T.Helper()

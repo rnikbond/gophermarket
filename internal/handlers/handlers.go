@@ -53,6 +53,8 @@ func (h *Handler) InitRoutes() *chi.Mux {
 			r.Post("/orders", h.CreateOrder)
 			r.Get("/orders", h.OrdersList)
 			r.Get("/balance", h.Balance)
+			r.Post("/withdraw", h.CreateWithPay)
+			r.Get("/balance/withdrawals", h.WriteOffInfo)
 		})
 	})
 

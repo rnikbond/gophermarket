@@ -7,6 +7,7 @@ import (
 	"gophermarket/internal/repository"
 	market "gophermarket/pkg"
 	"gophermarket/pkg/logpack"
+	"gophermarket/pkg/order"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -63,7 +64,7 @@ func TestOrder_Create(t *testing.T) {
 			ctx := context.Background()
 
 			if tt.want.err == nil {
-				orderRepoMock.EXPECT().Create(ctx, tt.args.order, tt.args.username).Return(nil)
+				orderRepoMock.EXPECT().Create(ctx, tt.args.order, tt.args.username, order.StatusNew).Return(nil)
 			}
 
 			repo := repository.Repository{
