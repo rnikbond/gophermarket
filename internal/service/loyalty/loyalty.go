@@ -3,9 +3,11 @@ package loyalty
 
 import (
 	"context"
+	"math"
 
 	gophermarket "gophermarket/internal"
 	"gophermarket/internal/repository"
+	"gophermarket/pkg"
 	"gophermarket/pkg/logpack"
 )
 
@@ -14,6 +16,7 @@ type ServiceLoyalty interface {
 	HowMatchUsed(ctx context.Context, username string) (float64, error)
 	SetAccrual(ctx context.Context, order int64, accrual float64) error
 	Balance(ctx context.Context, username string) (gophermarket.Balance, error)
+	Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error)
 }
 
 type Loyalty struct {
@@ -55,8 +58,19 @@ func (service Loyalty) Balance(ctx context.Context, username string) (gophermark
 		return gophermarket.Balance{}, err
 	}
 
+	round := func(val float64, precision uint) float64 {
+		ratio := math.Pow(10, float64(precision))
+		return math.Round(val*ratio) / ratio
+	}
+
+	current = round(current-used, 2)
+
 	return gophermarket.Balance{
 		Accrual:   current,
 		Withdrawn: used,
 	}, nil
+}
+
+func (service Loyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
+	return service.repo.Loyalty.Payments(ctx, username)
 }

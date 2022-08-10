@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"strconv"
@@ -8,6 +9,7 @@ import (
 	market "gophermarket/pkg"
 )
 
+// CreateOrder Обработчик запроса на создание заказа
 func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	if r.Header.Get("Content-Type") != "text/plain" {
@@ -35,7 +37,7 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	order, err := strconv.ParseInt(string(data), 10, 64)
 	if err != nil {
-		http.Error(w, "invalid order number", http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -47,6 +49,51 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	if errOrder != market.ErrUserAlreadyOrderedIt {
 		http.Error(w, errOrder.Error(), market.ErrorHTTP(errOrder))
+		return
+	}
+}
+
+// CreateWithPay - обработчик запроса на создание заказа со списанием баллов
+func (h *Handler) CreateWithPay(w http.ResponseWriter, r *http.Request) {
+
+	if r.Header.Get("Content-Type") != "application/json" {
+		http.Error(w, http.StatusText(http.StatusUnsupportedMediaType), http.StatusUnsupportedMediaType)
+		return
+	}
+
+	username, _, ok := r.BasicAuth()
+	if !ok {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	defer func() {
+		if err := r.Body.Close(); err != nil {
+			h.logger.Err.Printf("could not close request body: %s\n", err)
+		}
+	}()
+
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var orderPay market.OrderWithPay
+
+	if err := json.Unmarshal(data, &orderPay); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	orderNum, errParse := strconv.ParseInt(orderPay.Order, 10, 64)
+	if errParse != nil {
+		http.Error(w, errParse.Error(), http.StatusBadRequest)
+		return
+	}
+
+	errCreate := h.services.Order.CreateWithPayment(r.Context(), orderNum, username, orderPay.Sum)
+	if errCreate != nil {
+		http.Error(w, errCreate.Error(), market.ErrorHTTP(errCreate))
 		return
 	}
 }

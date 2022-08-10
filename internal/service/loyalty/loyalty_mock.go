@@ -7,6 +7,7 @@ package loyalty
 import (
 	context "context"
 	gophermarket "gophermarket/internal"
+	pkg "gophermarket/pkg"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -78,6 +79,21 @@ func (m *MockServiceLoyalty) HowMatchUsed(ctx context.Context, username string) 
 func (mr *MockServiceLoyaltyMockRecorder) HowMatchUsed(ctx, username interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HowMatchUsed", reflect.TypeOf((*MockServiceLoyalty)(nil).HowMatchUsed), ctx, username)
+}
+
+// Payments mocks base method.
+func (m *MockServiceLoyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Payments", ctx, username)
+	ret0, _ := ret[0].([]pkg.PaymentInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Payments indicates an expected call of Payments.
+func (mr *MockServiceLoyaltyMockRecorder) Payments(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Payments", reflect.TypeOf((*MockServiceLoyalty)(nil).Payments), ctx, username)
 }
 
 // SetAccrual mocks base method.

@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"gophermarket/internal/repository"
+	"gophermarket/pkg"
 	"gophermarket/pkg/logpack"
-	pkgOrder "gophermarket/pkg/order"
 )
 
 type LoyaltyTask interface {
@@ -64,7 +64,7 @@ func (scan LoyaltyScanner) updateOrderStatuses(ctx context.Context, orders map[i
 
 	ordersAccrual := scan.ordersAccrualService(ctx, orders)
 
-	searcher := func(orders *[]pkgOrder.AccrualOrder, targetOrder int64) (int, bool) {
+	searcher := func(orders *[]pkg.OrderLoyalty, targetOrder int64) (int, bool) {
 		for i, order := range *orders {
 			num, err := strconv.ParseInt(order.Order, 10, 64)
 			if err != nil {
@@ -84,8 +84,8 @@ func (scan LoyaltyScanner) updateOrderStatuses(ctx context.Context, orders map[i
 		idx, ok := searcher(&ordersAccrual, orderNum)
 
 		if !ok { // Незавершенный заказ, который есть в репозитории, не найден в системе лояльности
-			if err := scan.repository.Order.SetStatus(ctx, orderNum, pkgOrder.StatusInvalid); err != nil {
-				scan.logger.Err.Printf("error update status order in repository on %s: %s\n", pkgOrder.StatusInvalid, err)
+			if err := scan.repository.Order.SetStatus(ctx, orderNum, pkg.StatusInvalid); err != nil {
+				scan.logger.Err.Printf("error update status order in repository on %s: %s\n", pkg.StatusInvalid, err)
 			}
 			continue
 		}
@@ -101,7 +101,7 @@ func (scan LoyaltyScanner) updateOrderStatuses(ctx context.Context, orders map[i
 			scan.logger.Err.Printf("error update status order in repository: %s\n", err)
 		}
 
-		if orderAccrual.Status != pkgOrder.StatusProcessed {
+		if orderAccrual.Status != pkg.StatusProcessed {
 			continue
 		}
 
@@ -113,9 +113,9 @@ func (scan LoyaltyScanner) updateOrderStatuses(ctx context.Context, orders map[i
 }
 
 // orderStatusesAccrual - Загрузка статусов по заказам из системы лояльности
-func (scan LoyaltyScanner) ordersAccrualService(ctx context.Context, orders map[int64]string) []pkgOrder.AccrualOrder {
+func (scan LoyaltyScanner) ordersAccrualService(ctx context.Context, orders map[int64]string) []pkg.OrderLoyalty {
 
-	var ordersAccrual []pkgOrder.AccrualOrder
+	var ordersAccrual []pkg.OrderLoyalty
 
 	for orderNum := range orders {
 		orderAccrual, err := scan.orderAccrualService(ctx, orderNum)
@@ -131,21 +131,21 @@ func (scan LoyaltyScanner) ordersAccrualService(ctx context.Context, orders map[
 }
 
 // orderAccrualService - Загрузка статуса заказа из системы лояльности
-func (scan LoyaltyScanner) orderAccrualService(ctx context.Context, orderNum int64) (pkgOrder.AccrualOrder, error) {
+func (scan LoyaltyScanner) orderAccrualService(ctx context.Context, orderNum int64) (pkg.OrderLoyalty, error) {
 
 	url := scan.addr + "/api/orders/" + strconv.FormatInt(orderNum, 10)
 	request, errRequest := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if errRequest != nil {
-		return pkgOrder.AccrualOrder{}, errRequest
+		return pkg.OrderLoyalty{}, errRequest
 	}
 
 	resp, err := scan.client.Do(request)
 	if err != nil {
-		return pkgOrder.AccrualOrder{}, err
+		return pkg.OrderLoyalty{}, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return pkgOrder.AccrualOrder{}, errors.New("order not found")
+		return pkg.OrderLoyalty{}, errors.New("order not found")
 	}
 
 	defer func() {
@@ -156,16 +156,16 @@ func (scan LoyaltyScanner) orderAccrualService(ctx context.Context, orderNum int
 
 	data, errRead := io.ReadAll(resp.Body)
 	if errRead != nil {
-		return pkgOrder.AccrualOrder{}, errRead
+		return pkg.OrderLoyalty{}, errRead
 	}
 
-	var orderAccrual pkgOrder.AccrualOrder
+	var orderAccrual pkg.OrderLoyalty
 	if err := json.Unmarshal(data, &orderAccrual); err != nil {
-		return pkgOrder.AccrualOrder{}, err
+		return pkg.OrderLoyalty{}, err
 	}
 
 	if len(orderAccrual.Status) == 0 {
-		return pkgOrder.AccrualOrder{}, errors.New("accrual service returned empty status")
+		return pkg.OrderLoyalty{}, errors.New("accrual service returned empty status")
 	}
 
 	return orderAccrual, nil
@@ -175,13 +175,13 @@ func (scan LoyaltyScanner) orderAccrualService(ctx context.Context, orderNum int
 func (scan LoyaltyScanner) reloadOrders(ctx context.Context) (map[int64]string, error) {
 
 	statuses := []string{
-		pkgOrder.StatusNew,
-		pkgOrder.StatusProcessing,
+		pkg.StatusNew,
+		pkg.StatusProcessing,
 	}
 	orders, err := scan.repository.Order.GetByStatuses(ctx, statuses)
 	if err != nil {
 		scan.logger.Err.Printf("could not reload orders with statuses [%s,%s]: %s\n",
-			pkgOrder.StatusNew, pkgOrder.StatusProcessing, err)
+			pkg.StatusNew, pkg.StatusProcessing, err)
 		return nil, err
 	}
 

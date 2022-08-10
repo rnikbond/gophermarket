@@ -7,7 +7,7 @@ package repository
 import (
 	context "context"
 	gophermarket "gophermarket/internal"
-	order "gophermarket/pkg/order"
+	pkg "gophermarket/pkg"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -89,17 +89,31 @@ func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockOrder) Create(ctx context.Context, number int64, username string) error {
+func (m *MockOrder) Create(ctx context.Context, number int64, username, status string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", ctx, number, username)
+	ret := m.ctrl.Call(m, "Create", ctx, number, username, status)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockOrderMockRecorder) Create(ctx, number, username interface{}) *gomock.Call {
+func (mr *MockOrderMockRecorder) Create(ctx, number, username, status interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOrder)(nil).Create), ctx, number, username)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOrder)(nil).Create), ctx, number, username, status)
+}
+
+// CreateWithPayment mocks base method.
+func (m *MockOrder) CreateWithPayment(ctx context.Context, number int64, username string, sum float64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateWithPayment", ctx, number, username, sum)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateWithPayment indicates an expected call of CreateWithPayment.
+func (mr *MockOrderMockRecorder) CreateWithPayment(ctx, number, username, sum interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWithPayment", reflect.TypeOf((*MockOrder)(nil).CreateWithPayment), ctx, number, username, sum)
 }
 
 // GetByStatuses mocks base method.
@@ -132,10 +146,10 @@ func (mr *MockOrderMockRecorder) SetStatus(ctx, order, status interface{}) *gomo
 }
 
 // UserOrders mocks base method.
-func (m *MockOrder) UserOrders(ctx context.Context, username string) ([]order.InfoOrder, error) {
+func (m *MockOrder) UserOrders(ctx context.Context, username string) ([]pkg.OrderInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UserOrders", ctx, username)
-	ret0, _ := ret[0].([]order.InfoOrder)
+	ret0, _ := ret[0].([]pkg.OrderInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -197,6 +211,21 @@ func (m *MockLoyalty) HowMatchUsed(ctx context.Context, username string) (float6
 func (mr *MockLoyaltyMockRecorder) HowMatchUsed(ctx, username interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HowMatchUsed", reflect.TypeOf((*MockLoyalty)(nil).HowMatchUsed), ctx, username)
+}
+
+// Payments mocks base method.
+func (m *MockLoyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Payments", ctx, username)
+	ret0, _ := ret[0].([]pkg.PaymentInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Payments indicates an expected call of Payments.
+func (mr *MockLoyaltyMockRecorder) Payments(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Payments", reflect.TypeOf((*MockLoyalty)(nil).Payments), ctx, username)
 }
 
 // SetAccrual mocks base method.

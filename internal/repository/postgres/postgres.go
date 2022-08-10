@@ -37,14 +37,9 @@ func createTables(db *sqlx.DB) error {
                 number BIGINT UNIQUE,
            uploaded_at TIMESTAMPTZ,
                 status CHARACTER VARYING(50),
-               accrual INTEGER DEFAULT 0
+               accrual INTEGER DEFAULT 0,
+            withdrawal INTEGER DEFAULT 0
         );`,
-
-		//`CREATE TABLE IF NOT EXISTS withdrawals (
-		//         id SERIAL PRIMARY KEY,
-		//   order_id INTEGER REFERENCES orders (id),
-		// withdrawal MONEY
-		// );`,
 	}
 
 	for _, query := range tables {

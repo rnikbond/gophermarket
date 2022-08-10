@@ -11,8 +11,8 @@ import (
 
 	"gophermarket/internal/service"
 	"gophermarket/internal/service/order"
+	"gophermarket/pkg"
 	"gophermarket/pkg/logpack"
-	pkgorder "gophermarket/pkg/order"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +36,7 @@ func TestHandler_OrdersList(t *testing.T) {
 	}
 
 	type want struct {
-		orders     []pkgorder.InfoOrder
+		orders     []pkg.OrderInfo
 		status     int
 		errService error
 	}
@@ -54,16 +54,16 @@ func TestHandler_OrdersList(t *testing.T) {
 				userService: true,
 			},
 			want: want{
-				orders: []pkgorder.InfoOrder{
+				orders: []pkg.OrderInfo{
 					{
 						Order:      "417147",
-						Status:     pkgorder.StatusProcessed,
+						Status:     pkg.StatusProcessed,
 						Accrual:    50.65,
 						UploadedAt: time.Now().Format(timeLayout),
 					},
 					{
 						Order:      "951913",
-						Status:     pkgorder.StatusProcessed,
+						Status:     pkg.StatusProcessed,
 						UploadedAt: time.Now().Format(timeLayout),
 					},
 				},
@@ -79,7 +79,7 @@ func TestHandler_OrdersList(t *testing.T) {
 				userService: true,
 			},
 			want: want{
-				orders:     []pkgorder.InfoOrder{},
+				orders:     []pkg.OrderInfo{},
 				status:     http.StatusNoContent,
 				errService: nil,
 			},
@@ -119,7 +119,7 @@ func TestHandler_OrdersList(t *testing.T) {
 
 			require.NoError(t, errRead)
 
-			var orders []pkgorder.InfoOrder
+			var orders []pkg.OrderInfo
 			errJSON := json.Unmarshal(data, &orders)
 			require.NoError(t, errJSON)
 

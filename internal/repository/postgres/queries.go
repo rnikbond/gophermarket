@@ -19,6 +19,10 @@ const (
 	queryCreateOrder = `INSERT INTO orders (user_id, number,status, uploaded_at) 
                         VALUES($1,$2,$3,$4)`
 
+	queryChangeWithdrawals = `UPDATE orders 
+                              SET withdrawal = $1
+                              WHERE number = $2`
+
 	queryUpdateOrder = `UPDATE orders
                         SET status = $1
                         WHERE number = $2`
@@ -45,4 +49,12 @@ const (
 	queryUserAccruals = `SELECT SUM(accrual)
                          FROM orders
                          WHERE user_id = $1`
+
+	queryUserWithdrawals = `SELECT SUM(withdrawal)
+                            FROM orders
+                            WHERE user_id = $1`
+
+	queryWithdrawalsInfo = `SELECT number, withdrawal, uploaded_at
+                            FROM orders
+                            WHERE user_id = $1 AND withdrawal > 0`
 )

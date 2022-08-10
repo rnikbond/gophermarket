@@ -63,7 +63,7 @@ func TestOrder_Create(t *testing.T) {
 			ctx := context.Background()
 
 			if tt.want.err == nil {
-				orderRepoMock.EXPECT().Create(ctx, tt.args.order, tt.args.username).Return(nil)
+				orderRepoMock.EXPECT().Create(ctx, tt.args.order, tt.args.username, market.StatusNew).Return(nil)
 			}
 
 			repo := repository.Repository{
