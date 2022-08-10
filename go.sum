@@ -1,3 +1,5 @@
+github.com/EClaesson/go-luhn v0.0.0-20210207103312-b1c12d658b70 h1:vhtZZzKdaDi82ozLwraWvhxJGIPz3dcUzxs/GGk8tGs=
+github.com/EClaesson/go-luhn v0.0.0-20210207103312-b1c12d658b70/go.mod h1:WTuslhl/WWQLOzsLQL990kRSMa1xaSYYgO4BF1E1geE=
 github.com/caarlos0/env v3.5.0+incompatible h1:Yy0UN8o9Wtr/jGHZDpCBLpNrzcFLLM2yixi/rBrKyJs=
 github.com/caarlos0/env v3.5.0+incompatible/go.mod h1:tdCsowwCzMLdkqRYDlHpZCp2UooDD3MspDBjZ2AD02Y=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=

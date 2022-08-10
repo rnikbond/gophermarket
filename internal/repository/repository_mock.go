@@ -5,7 +5,9 @@
 package repository
 
 import (
+	context "context"
 	gophermarket "gophermarket/internal"
+	order "gophermarket/pkg/order"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,32 +37,32 @@ func (m *MockAuthorization) EXPECT() *MockAuthorizationMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockAuthorization) Create(user gophermarket.User) error {
+func (m *MockAuthorization) Create(ctx context.Context, user gophermarket.User) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", user)
+	ret := m.ctrl.Call(m, "Create", ctx, user)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockAuthorizationMockRecorder) Create(user interface{}) *gomock.Call {
+func (mr *MockAuthorizationMockRecorder) Create(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAuthorization)(nil).Create), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAuthorization)(nil).Create), ctx, user)
 }
 
 // ID mocks base method.
-func (m *MockAuthorization) ID(user gophermarket.User) (int64, error) {
+func (m *MockAuthorization) ID(ctx context.Context, user gophermarket.User) (int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ID", user)
+	ret := m.ctrl.Call(m, "ID", ctx, user)
 	ret0, _ := ret[0].(int64)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ID indicates an expected call of ID.
-func (mr *MockAuthorizationMockRecorder) ID(user interface{}) *gomock.Call {
+func (mr *MockAuthorizationMockRecorder) ID(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ID", reflect.TypeOf((*MockAuthorization)(nil).ID), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ID", reflect.TypeOf((*MockAuthorization)(nil).ID), ctx, user)
 }
 
 // MockOrder is a mock of Order interface.
@@ -87,15 +89,126 @@ func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockOrder) Create(number int64, username string) error {
+func (m *MockOrder) Create(ctx context.Context, number int64, username string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", number, username)
+	ret := m.ctrl.Call(m, "Create", ctx, number, username)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockOrderMockRecorder) Create(number, username interface{}) *gomock.Call {
+func (mr *MockOrderMockRecorder) Create(ctx, number, username interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOrder)(nil).Create), number, username)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOrder)(nil).Create), ctx, number, username)
+}
+
+// GetByStatuses mocks base method.
+func (m *MockOrder) GetByStatuses(ctx context.Context, statuses []string) (map[int64]string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByStatuses", ctx, statuses)
+	ret0, _ := ret[0].(map[int64]string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByStatuses indicates an expected call of GetByStatuses.
+func (mr *MockOrderMockRecorder) GetByStatuses(ctx, statuses interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByStatuses", reflect.TypeOf((*MockOrder)(nil).GetByStatuses), ctx, statuses)
+}
+
+// SetStatus mocks base method.
+func (m *MockOrder) SetStatus(ctx context.Context, order int64, status string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetStatus", ctx, order, status)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetStatus indicates an expected call of SetStatus.
+func (mr *MockOrderMockRecorder) SetStatus(ctx, order, status interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStatus", reflect.TypeOf((*MockOrder)(nil).SetStatus), ctx, order, status)
+}
+
+// UserOrders mocks base method.
+func (m *MockOrder) UserOrders(ctx context.Context, username string) ([]order.InfoOrder, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UserOrders", ctx, username)
+	ret0, _ := ret[0].([]order.InfoOrder)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UserOrders indicates an expected call of UserOrders.
+func (mr *MockOrderMockRecorder) UserOrders(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UserOrders", reflect.TypeOf((*MockOrder)(nil).UserOrders), ctx, username)
+}
+
+// MockLoyalty is a mock of Loyalty interface.
+type MockLoyalty struct {
+	ctrl     *gomock.Controller
+	recorder *MockLoyaltyMockRecorder
+}
+
+// MockLoyaltyMockRecorder is the mock recorder for MockLoyalty.
+type MockLoyaltyMockRecorder struct {
+	mock *MockLoyalty
+}
+
+// NewMockLoyalty creates a new mock instance.
+func NewMockLoyalty(ctrl *gomock.Controller) *MockLoyalty {
+	mock := &MockLoyalty{ctrl: ctrl}
+	mock.recorder = &MockLoyaltyMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockLoyalty) EXPECT() *MockLoyaltyMockRecorder {
+	return m.recorder
+}
+
+// HowMatchAvailable mocks base method.
+func (m *MockLoyalty) HowMatchAvailable(ctx context.Context, username string) (float64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HowMatchAvailable", ctx, username)
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// HowMatchAvailable indicates an expected call of HowMatchAvailable.
+func (mr *MockLoyaltyMockRecorder) HowMatchAvailable(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HowMatchAvailable", reflect.TypeOf((*MockLoyalty)(nil).HowMatchAvailable), ctx, username)
+}
+
+// HowMatchUsed mocks base method.
+func (m *MockLoyalty) HowMatchUsed(ctx context.Context, username string) (float64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "HowMatchUsed", ctx, username)
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// HowMatchUsed indicates an expected call of HowMatchUsed.
+func (mr *MockLoyaltyMockRecorder) HowMatchUsed(ctx, username interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HowMatchUsed", reflect.TypeOf((*MockLoyalty)(nil).HowMatchUsed), ctx, username)
+}
+
+// SetAccrual mocks base method.
+func (m *MockLoyalty) SetAccrual(ctx context.Context, order int64, accrual float64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetAccrual", ctx, order, accrual)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetAccrual indicates an expected call of SetAccrual.
+func (mr *MockLoyaltyMockRecorder) SetAccrual(ctx, order, accrual interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAccrual", reflect.TypeOf((*MockLoyalty)(nil).SetAccrual), ctx, order, accrual)
 }

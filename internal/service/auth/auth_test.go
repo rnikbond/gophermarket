@@ -1,11 +1,13 @@
 package auth
 
 import (
+	"context"
 	"testing"
 
 	market "gophermarket/internal"
 	"gophermarket/internal/repository"
 	"gophermarket/pkg"
+	"gophermarket/pkg/logpack"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -88,18 +90,19 @@ func TestAuth_SignUp(t *testing.T) {
 			tt.args.userRepo.Password = hash
 
 			authRepoMock := repository.NewMockAuthorization(ctrl)
+			ctx := context.Background()
 
 			if tt.args.waitErrSignUp == nil {
-				authRepoMock.EXPECT().Create(tt.args.userRepo).Return(nil)
+				authRepoMock.EXPECT().Create(ctx, tt.args.userRepo).Return(nil)
 			}
 
 			repo := repository.Repository{
 				Authorization: authRepoMock,
 			}
 
-			authService := NewService(&repo, salt)
+			authService := NewService(&repo, salt, logpack.NewLogger())
 
-			err := authService.SignUp(tt.args.userAuth)
+			err := authService.SignUp(ctx, tt.args.userAuth)
 			assert.Equal(t, err, tt.args.waitErrSignUp)
 		})
 	}
@@ -178,18 +181,19 @@ func TestAuth_SignIn(t *testing.T) {
 			tt.args.userRepo.Password = hash
 
 			authRepoMock := repository.NewMockAuthorization(ctrl)
+			ctx := context.Background()
 
 			if tt.args.waitErrSignUp == nil {
-				authRepoMock.EXPECT().ID(tt.args.userRepo).Return(int64(0), nil)
+				authRepoMock.EXPECT().ID(ctx, tt.args.userRepo).Return(int64(0), nil)
 			}
 
 			repo := repository.Repository{
 				Authorization: authRepoMock,
 			}
 
-			authService := NewService(&repo, salt)
+			authService := NewService(&repo, salt, logpack.NewLogger())
 
-			err := authService.SignIn(tt.args.userAuth)
+			err := authService.SignIn(ctx, tt.args.userAuth)
 			assert.Equal(t, err, tt.args.waitErrSignUp)
 		})
 	}

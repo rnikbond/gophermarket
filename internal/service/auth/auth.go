@@ -1,31 +1,37 @@
+//go:generate mockgen -source auth.go -destination auth_mock.go -package auth
 package auth
 
 import (
+	"context"
+
 	market "gophermarket/internal"
 	"gophermarket/internal/repository"
 	"gophermarket/pkg"
+	"gophermarket/pkg/logpack"
 )
 
 type ServiceAuth interface {
-	SignUp(user market.User) error
-	SignIn(user market.User) error
+	SignUp(ctx context.Context, user market.User) error
+	SignIn(ctx context.Context, user market.User) error
 
 	ValidateAuth(user market.User) error
 }
 
 type Auth struct {
+	logger       *logpack.LogPack
 	repo         *repository.Repository
 	passwordSalt string
 }
 
-func NewService(repo *repository.Repository, pwdSalt string) ServiceAuth {
+func NewService(repo *repository.Repository, pwdSalt string, logger *logpack.LogPack) ServiceAuth {
 	return &Auth{
 		repo:         repo,
 		passwordSalt: pwdSalt,
+		logger:       logger,
 	}
 }
 
-func (s Auth) SignUp(user market.User) error {
+func (s Auth) SignUp(ctx context.Context, user market.User) error {
 	if err := s.ValidateAuth(user); err != nil {
 		return err
 	}
@@ -37,14 +43,14 @@ func (s Auth) SignUp(user market.User) error {
 
 	user.Password = hash
 
-	if err := s.repo.Authorization.Create(user); err != nil {
+	if err := s.repo.Authorization.Create(ctx, user); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s Auth) SignIn(user market.User) error {
+func (s Auth) SignIn(ctx context.Context, user market.User) error {
 	if err := s.ValidateAuth(user); err != nil {
 		return err
 	}
@@ -56,7 +62,7 @@ func (s Auth) SignIn(user market.User) error {
 
 	user.Password = hash
 
-	if _, err := s.repo.Authorization.ID(user); err != nil {
+	if _, err := s.repo.Authorization.ID(ctx, user); err != nil {
 		return err
 	}
 

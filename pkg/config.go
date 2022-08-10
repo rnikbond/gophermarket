@@ -8,25 +8,31 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/caarlos0/env"
 )
 
 type Config struct {
-	Address        string `env:"RUN_ADDRESS "`
-	DatabaseURI    string `env:"DATABASE_URI"`
-	AccrualAddress string `env:"ACCRUAL_SYSTEM_ADDRESS"`
-	TokenKey       string `env:"TOKEN_KEY"`
-	PasswordSalt   string `env:"PASSWORD_SALT"`
+	Address        string        `env:"RUN_ADDRESS"`
+	DatabaseURI    string        `env:"DATABASE_URI"`
+	AccrualAddress string        `env:"ACCRUAL_SYSTEM_ADDRESS"`
+	TokenKey       string        `env:"TOKEN_KEY"`
+	PasswordSalt   string        `env:"PASSWORD_SALT"`
+	IntervalScan   time.Duration `env:"INTERVAL_SCAN"`
 }
 
-func NewConfig() Config {
+func NewConfig() *Config {
 	cfg := Config{
-		Address: ":8080",
+		Address:        ":8080",
+		AccrualAddress: "http://localhost:8080",
+		TokenKey:       "tokenKeyJWT",
+		PasswordSalt:   "salt-salt-salt",
+		IntervalScan:   1 * time.Second,
 	}
 
 	cfg.ReadEnvVars()
-	return cfg
+	return &cfg
 }
 
 func (cfg Config) String() string {
@@ -39,6 +45,7 @@ func (cfg Config) String() string {
 	builder.WriteString(fmt.Sprintf("\tACCRUAL_SYSTEM_ADDRESS: %s\n", cfg.AccrualAddress))
 	builder.WriteString(fmt.Sprintf("\tTOKEN_KEY: %s\n", cfg.TokenKey))
 	builder.WriteString(fmt.Sprintf("\tPASSWORD_SALT: %s\n", cfg.PasswordSalt))
+	builder.WriteString(fmt.Sprintf("\tINTERVAL_SCAN: %s\n", cfg.IntervalScan.String()))
 
 	return builder.String()
 }
@@ -60,8 +67,9 @@ func (cfg *Config) ParseFlags() error {
 
 	flag.StringVar(&cfg.AccrualAddress, "r", cfg.AccrualAddress, "string - accrual address")
 	flag.StringVar(&cfg.DatabaseURI, "d", cfg.DatabaseURI, "string - database DSN")
-	flag.StringVar(&cfg.TokenKey, "t", "secretKeyJWT", "string - secret key JWT")
-	flag.StringVar(&cfg.PasswordSalt, "s", "salt-salt-salt", "string - password salt")
+	flag.StringVar(&cfg.TokenKey, "t", cfg.TokenKey, "string - secret key JWT")
+	flag.StringVar(&cfg.PasswordSalt, "s", cfg.PasswordSalt, "string - password salt")
+	flag.DurationVar(&cfg.IntervalScan, "i", cfg.IntervalScan, "duration - interval scanning status order")
 
 	addr := flag.String("a", cfg.Address, "string - host:port")
 	flag.Parse()

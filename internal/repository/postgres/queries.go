@@ -11,15 +11,38 @@ const (
 
 	queryGetUserIDByName = `SELECT id
                             FROM users 
-                             WHERE username = $1`
+                            WHERE username = $1`
 )
 
 // Order
 const (
-	queryCreateOrder = `INSERT INTO orders (user_id, number,status,created_at) 
+	queryCreateOrder = `INSERT INTO orders (user_id, number,status, uploaded_at) 
                         VALUES($1,$2,$3,$4)`
+
+	queryUpdateOrder = `UPDATE orders
+                        SET status = $1
+                        WHERE number = $2`
+
+	queryUpdateAccrual = `UPDATE orders
+                          SET accrual = $1
+                          WHERE number = $2`
 
 	queryOrderUserID = `SELECT user_id 
                         FROM orders 
                         WHERE number = $1`
+
+	queryOrdersByStatuses = `SELECT number, status
+                             FROM orders
+                             WHERE status = ANY($1)`
+
+	queryUserOrders = `SELECT number, status, accrual, uploaded_at
+                       FROM orders
+                       WHERE user_id = $1`
+)
+
+// Accruals
+const (
+	queryUserAccruals = `SELECT SUM(accrual)
+                         FROM orders
+                         WHERE user_id = $1`
 )
