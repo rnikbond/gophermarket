@@ -6,7 +6,7 @@ package order
 
 import (
 	context "context"
-	pkg "gophermarket/pkg"
+	repository "gophermarket/internal/repository"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -64,10 +64,10 @@ func (mr *MockServiceOrderMockRecorder) CreateWithPayment(ctx, number, username,
 }
 
 // UserOrders mocks base method.
-func (m *MockServiceOrder) UserOrders(ctx context.Context, username string) ([]pkg.OrderInfo, error) {
+func (m *MockServiceOrder) UserOrders(ctx context.Context, username string) ([]repository.OrderInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UserOrders", ctx, username)
-	ret0, _ := ret[0].([]pkg.OrderInfo)
+	ret0, _ := ret[0].([]repository.OrderInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

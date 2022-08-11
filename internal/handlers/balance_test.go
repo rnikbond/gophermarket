@@ -8,7 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	gophermarket "gophermarket/internal"
 	"gophermarket/internal/service"
 	"gophermarket/internal/service/loyalty"
 	"gophermarket/pkg/logpack"
@@ -33,7 +32,7 @@ func TestHandler_Balance(t *testing.T) {
 	}
 
 	type want struct {
-		balance    gophermarket.Balance
+		balance    loyalty.Balance
 		status     int
 		errService error
 	}
@@ -51,7 +50,7 @@ func TestHandler_Balance(t *testing.T) {
 				userService: true,
 			},
 			want: want{
-				balance: gophermarket.Balance{
+				balance: loyalty.Balance{
 					Accrual:   153.23,
 					Withdrawn: 0,
 				},
@@ -90,7 +89,7 @@ func TestHandler_Balance(t *testing.T) {
 
 			require.NoError(t, errRead)
 
-			var balance gophermarket.Balance
+			var balance loyalty.Balance
 			errJSON := json.Unmarshal(data, &balance)
 			require.NoError(t, errJSON)
 

@@ -78,7 +78,7 @@ func (l Loyalty) SetAccrual(ctx context.Context, order string, accrual float64) 
 }
 
 // Payments - Получение информации о списании
-func (l Loyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
+func (l Loyalty) Payments(ctx context.Context, username string) ([]repository.PaymentInfo, error) {
 
 	var userID int64
 	row := l.db.QueryRowContext(ctx, queryGetUserIDByName, username)
@@ -97,14 +97,14 @@ func (l Loyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentIn
 		}
 	}()
 
-	var paymentsInfo []pkg.PaymentInfo
+	var paymentsInfo []repository.PaymentInfo
 
 	for rows.Next() {
 
 		var orderNum int64
 		var withdrawal int64
 
-		var writeOff pkg.PaymentInfo
+		var writeOff repository.PaymentInfo
 
 		if err := rows.Scan(&orderNum, &withdrawal, &writeOff.UploadedAt); err != nil {
 			return nil, err

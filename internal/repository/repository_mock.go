@@ -6,8 +6,7 @@ package repository
 
 import (
 	context "context"
-	gophermarket "gophermarket/internal"
-	pkg "gophermarket/pkg"
+	internal "gophermarket/internal"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -37,7 +36,7 @@ func (m *MockAuthorization) EXPECT() *MockAuthorizationMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockAuthorization) Create(ctx context.Context, user gophermarket.User) error {
+func (m *MockAuthorization) Create(ctx context.Context, user internal.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, user)
 	ret0, _ := ret[0].(error)
@@ -51,7 +50,7 @@ func (mr *MockAuthorizationMockRecorder) Create(ctx, user interface{}) *gomock.C
 }
 
 // ID mocks base method.
-func (m *MockAuthorization) ID(ctx context.Context, user gophermarket.User) (int64, error) {
+func (m *MockAuthorization) ID(ctx context.Context, user internal.User) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ID", ctx, user)
 	ret0, _ := ret[0].(int64)
@@ -146,10 +145,10 @@ func (mr *MockOrderMockRecorder) SetStatus(ctx, order, status interface{}) *gomo
 }
 
 // UserOrders mocks base method.
-func (m *MockOrder) UserOrders(ctx context.Context, username string) ([]pkg.OrderInfo, error) {
+func (m *MockOrder) UserOrders(ctx context.Context, username string) ([]OrderInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UserOrders", ctx, username)
-	ret0, _ := ret[0].([]pkg.OrderInfo)
+	ret0, _ := ret[0].([]OrderInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -214,10 +213,10 @@ func (mr *MockLoyaltyMockRecorder) HowMatchUsed(ctx, username interface{}) *gomo
 }
 
 // Payments mocks base method.
-func (m *MockLoyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
+func (m *MockLoyalty) Payments(ctx context.Context, username string) ([]PaymentInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Payments", ctx, username)
-	ret0, _ := ret[0].([]pkg.PaymentInfo)
+	ret0, _ := ret[0].([]PaymentInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

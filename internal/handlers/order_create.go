@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	"gophermarket/internal/repository"
 	market "gophermarket/pkg"
 )
 
@@ -72,7 +73,7 @@ func (h *Handler) CreateWithPay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var orderPay market.OrderWithPay
+	var orderPay repository.OrderWithPay
 
 	if err := json.Unmarshal(data, &orderPay); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

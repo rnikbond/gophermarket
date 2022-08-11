@@ -55,7 +55,7 @@ func (pg Order) Create(ctx context.Context, number, username, status string) err
 
 func (pg Order) CreateWithPayment(ctx context.Context, number, username string, sum float64) error {
 
-	if err := pg.Create(ctx, number, username, market.StatusProcessed); err != nil {
+	if err := pg.Create(ctx, number, username, repository.StatusProcessed); err != nil {
 		if err == market.ErrUserAlreadyOrderedIt {
 			return market.ErrOrderAlreadyExists
 		}
@@ -107,7 +107,7 @@ func (pg Order) SetStatus(ctx context.Context, order, status string) error {
 	return err
 }
 
-func (pg Order) UserOrders(ctx context.Context, username string) ([]market.OrderInfo, error) {
+func (pg Order) UserOrders(ctx context.Context, username string) ([]repository.OrderInfo, error) {
 
 	var userID int64
 	row := pg.db.QueryRowContext(ctx, queryGetUserIDByName, username)
@@ -126,10 +126,10 @@ func (pg Order) UserOrders(ctx context.Context, username string) ([]market.Order
 		}
 	}()
 
-	var infoOrders []market.OrderInfo
+	var infoOrders []repository.OrderInfo
 
 	for rows.Next() {
-		var infoOrder market.OrderInfo
+		var infoOrder repository.OrderInfo
 
 		errScan := rows.Scan(&infoOrder.Order, &infoOrder.Status, &infoOrder.Accrual, &infoOrder.UploadedAt)
 		if errScan != nil {

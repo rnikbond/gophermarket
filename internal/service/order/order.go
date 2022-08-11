@@ -14,7 +14,7 @@ import (
 type ServiceOrder interface {
 	Create(ctx context.Context, number, username string) error
 	CreateWithPayment(ctx context.Context, number, username string, sum float64) error
-	UserOrders(ctx context.Context, username string) ([]pkg.OrderInfo, error)
+	UserOrders(ctx context.Context, username string) ([]repository.OrderInfo, error)
 }
 
 type Order struct {
@@ -38,7 +38,7 @@ func (or Order) Create(ctx context.Context, number, username string) error {
 		return pkg.ErrInvalidOrderNumber
 	}
 
-	return or.repo.Order.Create(ctx, number, username, pkg.StatusNew)
+	return or.repo.Order.Create(ctx, number, username, repository.StatusNew)
 }
 
 func (or Order) CreateWithPayment(ctx context.Context, number, username string, sum float64) error {
@@ -67,6 +67,6 @@ func (or Order) CreateWithPayment(ctx context.Context, number, username string, 
 	return or.repo.Order.CreateWithPayment(ctx, number, username, sum)
 }
 
-func (or Order) UserOrders(ctx context.Context, username string) ([]pkg.OrderInfo, error) {
+func (or Order) UserOrders(ctx context.Context, username string) ([]repository.OrderInfo, error) {
 	return or.repo.Order.UserOrders(ctx, username)
 }

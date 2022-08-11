@@ -6,8 +6,7 @@ package loyalty
 
 import (
 	context "context"
-	gophermarket "gophermarket/internal"
-	pkg "gophermarket/pkg"
+	repository "gophermarket/internal/repository"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -37,10 +36,10 @@ func (m *MockServiceLoyalty) EXPECT() *MockServiceLoyaltyMockRecorder {
 }
 
 // Balance mocks base method.
-func (m *MockServiceLoyalty) Balance(ctx context.Context, username string) (gophermarket.Balance, error) {
+func (m *MockServiceLoyalty) Balance(ctx context.Context, username string) (Balance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Balance", ctx, username)
-	ret0, _ := ret[0].(gophermarket.Balance)
+	ret0, _ := ret[0].(Balance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -82,10 +81,10 @@ func (mr *MockServiceLoyaltyMockRecorder) HowMatchUsed(ctx, username interface{}
 }
 
 // Payments mocks base method.
-func (m *MockServiceLoyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
+func (m *MockServiceLoyalty) Payments(ctx context.Context, username string) ([]repository.PaymentInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Payments", ctx, username)
-	ret0, _ := ret[0].([]pkg.PaymentInfo)
+	ret0, _ := ret[0].([]repository.PaymentInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
