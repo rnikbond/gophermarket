@@ -97,7 +97,7 @@ func (mr *MockServiceLoyaltyMockRecorder) Payments(ctx, username interface{}) *g
 }
 
 // SetAccrual mocks base method.
-func (m *MockServiceLoyalty) SetAccrual(ctx context.Context, order int64, accrual float64) error {
+func (m *MockServiceLoyalty) SetAccrual(ctx context.Context, order string, accrual float64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetAccrual", ctx, order, accrual)
 	ret0, _ := ret[0].(error)

@@ -34,7 +34,7 @@ func createTables(db *sqlx.DB) error {
 		`CREATE TABLE IF NOT EXISTS orders (
                     id SERIAL PRIMARY KEY,
                user_id INTEGER REFERENCES users (id),
-                number BIGINT UNIQUE,
+                number CHARACTER VARYING(50),
            uploaded_at TIMESTAMPTZ,
                 status CHARACTER VARYING(50),
                accrual INTEGER DEFAULT 0,

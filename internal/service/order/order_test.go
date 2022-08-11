@@ -22,7 +22,7 @@ func TestOrder_Create(t *testing.T) {
 	type args struct {
 		ctx      context.Context
 		username string
-		order    int64
+		order    string
 	}
 
 	type want struct {
@@ -39,7 +39,7 @@ func TestOrder_Create(t *testing.T) {
 			args: args{
 				ctx:      context.Background(),
 				username: "user_test",
-				order:    417147,
+				order:    "417147",
 			},
 			want: want{
 				err: nil,
@@ -50,7 +50,7 @@ func TestOrder_Create(t *testing.T) {
 			args: args{
 				ctx:      context.Background(),
 				username: "user_test",
-				order:    123123,
+				order:    "123123",
 			},
 			want: want{
 				err: market.ErrInvalidOrderNumber,

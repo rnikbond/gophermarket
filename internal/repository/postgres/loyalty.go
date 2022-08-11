@@ -70,7 +70,7 @@ func (l Loyalty) HowMatchUsed(ctx context.Context, username string) (float64, er
 }
 
 // SetAccrual - Изменение начислений по заказу
-func (l Loyalty) SetAccrual(ctx context.Context, order int64, accrual float64) error {
+func (l Loyalty) SetAccrual(ctx context.Context, order string, accrual float64) error {
 
 	accrualRound := int64(accrual * 100)
 	_, err := l.db.ExecContext(ctx, queryUpdateAccrual, accrualRound, order)

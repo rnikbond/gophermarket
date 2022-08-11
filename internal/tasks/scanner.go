@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"strconv"
 	"time"
 
 	"gophermarket/internal/repository"
@@ -60,18 +59,13 @@ func (scan LoyaltyScanner) Scan(ctx context.Context) {
 }
 
 // updateOrderStatuses - Обновление статусов заказов в репозитории
-func (scan LoyaltyScanner) updateOrderStatuses(ctx context.Context, orders map[int64]string) {
+func (scan LoyaltyScanner) updateOrderStatuses(ctx context.Context, orders map[string]string) {
 
 	ordersAccrual := scan.ordersAccrualService(ctx, orders)
 
-	searcher := func(orders *[]pkg.OrderLoyalty, targetOrder int64) (int, bool) {
+	searcher := func(orders *[]pkg.OrderLoyalty, targetOrder string) (int, bool) {
 		for i, order := range *orders {
-			num, err := strconv.ParseInt(order.Order, 10, 64)
-			if err != nil {
-				continue
-			}
-
-			if num == targetOrder {
+			if order.Order == targetOrder {
 				return i, true
 			}
 		}
@@ -79,12 +73,12 @@ func (scan LoyaltyScanner) updateOrderStatuses(ctx context.Context, orders map[i
 		return 0, false
 	}
 
-	for orderNum, status := range orders {
+	for order, status := range orders {
 
-		idx, ok := searcher(&ordersAccrual, orderNum)
+		idx, ok := searcher(&ordersAccrual, order)
 
 		if !ok { // Незавершенный заказ, который есть в репозитории, не найден в системе лояльности
-			if err := scan.repository.Order.SetStatus(ctx, orderNum, pkg.StatusInvalid); err != nil {
+			if err := scan.repository.Order.SetStatus(ctx, order, pkg.StatusInvalid); err != nil {
 				scan.logger.Err.Printf("error update status order in repository on %s: %s\n", pkg.StatusInvalid, err)
 			}
 			continue
@@ -97,7 +91,7 @@ func (scan LoyaltyScanner) updateOrderStatuses(ctx context.Context, orders map[i
 			continue
 		}
 
-		if err := scan.repository.Order.SetStatus(ctx, orderNum, orderAccrual.Status); err != nil {
+		if err := scan.repository.Order.SetStatus(ctx, order, orderAccrual.Status); err != nil {
 			scan.logger.Err.Printf("error update status order in repository: %s\n", err)
 		}
 
@@ -106,14 +100,14 @@ func (scan LoyaltyScanner) updateOrderStatuses(ctx context.Context, orders map[i
 		}
 
 		// Заказ получил завершенный статус в системе лояльности - сохраняем баллы за заказ
-		if err := scan.repository.Loyalty.SetAccrual(ctx, orderNum, orderAccrual.Accrual); err != nil {
+		if err := scan.repository.Loyalty.SetAccrual(ctx, order, orderAccrual.Accrual); err != nil {
 			scan.logger.Err.Printf("error update status order in repository: %s\n", err)
 		}
 	}
 }
 
 // orderStatusesAccrual - Загрузка статусов по заказам из системы лояльности
-func (scan LoyaltyScanner) ordersAccrualService(ctx context.Context, orders map[int64]string) []pkg.OrderLoyalty {
+func (scan LoyaltyScanner) ordersAccrualService(ctx context.Context, orders map[string]string) []pkg.OrderLoyalty {
 
 	var ordersAccrual []pkg.OrderLoyalty
 
@@ -131,9 +125,9 @@ func (scan LoyaltyScanner) ordersAccrualService(ctx context.Context, orders map[
 }
 
 // orderAccrualService - Загрузка статуса заказа из системы лояльности
-func (scan LoyaltyScanner) orderAccrualService(ctx context.Context, orderNum int64) (pkg.OrderLoyalty, error) {
+func (scan LoyaltyScanner) orderAccrualService(ctx context.Context, order string) (pkg.OrderLoyalty, error) {
 
-	url := scan.addr + "/api/orders/" + strconv.FormatInt(orderNum, 10)
+	url := scan.addr + "/api/orders/" + order
 	request, errRequest := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if errRequest != nil {
 		return pkg.OrderLoyalty{}, errRequest
@@ -172,7 +166,7 @@ func (scan LoyaltyScanner) orderAccrualService(ctx context.Context, orderNum int
 }
 
 // reloadOrders - Загрузка заказов из репозитория, у которых незавершенный статус начисления баллов
-func (scan LoyaltyScanner) reloadOrders(ctx context.Context) (map[int64]string, error) {
+func (scan LoyaltyScanner) reloadOrders(ctx context.Context) (map[string]string, error) {
 
 	statuses := []string{
 		pkg.StatusNew,

@@ -14,7 +14,7 @@ import (
 type ServiceLoyalty interface {
 	HowMatchAvailable(ctx context.Context, username string) (float64, error)
 	HowMatchUsed(ctx context.Context, username string) (float64, error)
-	SetAccrual(ctx context.Context, order int64, accrual float64) error
+	SetAccrual(ctx context.Context, order string, accrual float64) error
 	Balance(ctx context.Context, username string) (gophermarket.Balance, error)
 	Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error)
 }
@@ -41,7 +41,7 @@ func (service Loyalty) HowMatchUsed(ctx context.Context, username string) (float
 	return service.repo.Loyalty.HowMatchUsed(ctx, username)
 }
 
-func (service Loyalty) SetAccrual(ctx context.Context, order int64, accrual float64) error {
+func (service Loyalty) SetAccrual(ctx context.Context, order string, accrual float64) error {
 
 	return service.repo.Loyalty.SetAccrual(ctx, order, accrual)
 }
