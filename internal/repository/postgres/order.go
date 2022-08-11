@@ -50,7 +50,7 @@ func (pg Order) Create(ctx context.Context, number int64, username string, statu
 
 	// Если дошли сюда - значит такого заказа еще не было - создаем
 
-	_, err := pg.db.Exec(queryCreateOrder, userID, number, status, time.Now().Format("2006-01-02T15:04:05Z07:00"))
+	_, err := pg.db.Exec(queryCreateOrder, userID, number, status, time.Now().Format(time.RFC3339))
 	return err
 }
 

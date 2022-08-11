@@ -22,8 +22,7 @@ import (
 func TestHandler_OrdersList(t *testing.T) {
 
 	const (
-		tokenKey   = "PaintTheTownRed"
-		timeLayout = "2006-01-02T15:04:05Z07:00"
+		tokenKey = "PaintTheTownRed"
 	)
 
 	ctrl := gomock.NewController(t)
@@ -59,12 +58,12 @@ func TestHandler_OrdersList(t *testing.T) {
 						Order:      "417147",
 						Status:     pkg.StatusProcessed,
 						Accrual:    50.65,
-						UploadedAt: time.Now().Format(timeLayout),
+						UploadedAt: time.Now().Format(time.RFC3339),
 					},
 					{
 						Order:      "951913",
 						Status:     pkg.StatusProcessed,
-						UploadedAt: time.Now().Format(timeLayout),
+						UploadedAt: time.Now().Format(time.RFC3339),
 					},
 				},
 				status:     http.StatusOK,
