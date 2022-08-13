@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"net/http"
 	"os"
 	"os/signal"
@@ -9,7 +10,7 @@ import (
 	"time"
 
 	"gophermarket/internal/repository"
-	"gophermarket/internal/repository/postgres"
+	pgPack "gophermarket/internal/repository/postgres"
 	"gophermarket/internal/service"
 	"gophermarket/internal/tasks"
 	"gophermarket/pkg"
@@ -18,8 +19,12 @@ import (
 	market "gophermarket/internal"
 	"gophermarket/internal/handlers"
 
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
@@ -91,12 +96,21 @@ func PostgresDB(dsn string, logger *logpack.LogPack) *sqlx.DB {
 		logger.Fatal.Fatalf("connection to DB created, but Ping returned error: %s\n", err)
 	}
 
+	if err := migrateFor(db.DB, "postgres"); err != nil {
+		logger.Fatal.Fatalf("could not apply migrations: %s\n", err)
+	}
+
 	return db
+}
+
+func LoyaltyTask(loyaltyAddr string, repo *repository.Repository, interval time.Duration, logger *logpack.LogPack) tasks.LoyaltyTask {
+
+	return tasks.NewScanner(loyaltyAddr, repo, interval, logger)
 }
 
 func PostgresRepository(db *sqlx.DB, logger *logpack.LogPack) *repository.Repository {
 
-	repo, errRepo := postgres.NewPostgresRepository(db, logger)
+	repo, errRepo := pgPack.NewPostgresRepository(db, logger)
 	if errRepo != nil {
 		logger.Fatal.Fatalf("failed create repository: %s\n", errRepo)
 	}
@@ -104,7 +118,19 @@ func PostgresRepository(db *sqlx.DB, logger *logpack.LogPack) *repository.Reposi
 	return repo
 }
 
-func LoyaltyTask(loyaltyAddr string, repo *repository.Repository, interval time.Duration, logger *logpack.LogPack) tasks.LoyaltyTask {
+func migrateFor(db *sql.DB, driverDB string) error {
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return err
+	}
 
-	return tasks.NewScanner(loyaltyAddr, repo, interval, logger)
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://db/migrations",
+		driverDB, driver)
+
+	if err != nil {
+		return err
+	}
+
+	return m.Up()
 }
