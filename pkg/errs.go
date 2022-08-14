@@ -26,7 +26,8 @@ var (
 	ErrInvalidOrderNumber   = NewErr("invalid order number")
 	ErrOrderAlreadyExists   = NewErr("order number already exists")
 	ErrUserAlreadyOrderedIt = NewErr("user already ordered this order")
-	ErrPaymentNotAvailable  = NewErr("insufficient funds for payment")
+
+	ErrPaymentNotAvailable = NewErr("insufficient funds for payment")
 )
 
 var (
@@ -43,14 +44,16 @@ func ErrorHTTP(err error) int {
 
 	switch serviceErr {
 
-	case ErrUserAlreadyExists,
+	case
+		ErrUserAlreadyExists,
 		ErrOrderAlreadyExists:
 		return http.StatusConflict
 
 	case ErrEmptyAuthData:
 		return http.StatusBadRequest
 
-	case ErrUserNotFound,
+	case
+		ErrUserNotFound,
 		ErrUserUnauthorized:
 		return http.StatusUnauthorized
 

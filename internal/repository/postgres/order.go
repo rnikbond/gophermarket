@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"gophermarket/internal/repository"
@@ -26,7 +25,7 @@ func NewOrderPostgres(db *sqlx.DB, logger *logpack.LogPack) repository.Order {
 }
 
 // Create - Создание нового заказа
-func (pg Order) Create(ctx context.Context, number int64, username string, status string) error {
+func (pg Order) Create(ctx context.Context, number, username, status string) error {
 
 	var userID int64
 	row := pg.db.QueryRowContext(ctx, queryGetUserIDByName, username)
@@ -50,13 +49,13 @@ func (pg Order) Create(ctx context.Context, number int64, username string, statu
 
 	// Если дошли сюда - значит такого заказа еще не было - создаем
 
-	_, err := pg.db.Exec(queryCreateOrder, userID, number, status, time.Now().Format("2006-01-02T15:04:05Z07:00"))
+	_, err := pg.db.Exec(queryCreateOrder, userID, number, status, time.Now().Format(time.RFC3339))
 	return err
 }
 
-func (pg Order) CreateWithPayment(ctx context.Context, number int64, username string, sum float64) error {
+func (pg Order) CreateWithPayment(ctx context.Context, number, username string, sum float64) error {
 
-	if err := pg.Create(ctx, number, username, market.StatusProcessed); err != nil {
+	if err := pg.Create(ctx, number, username, repository.StatusProcessed); err != nil {
 		if err == market.ErrUserAlreadyOrderedIt {
 			return market.ErrOrderAlreadyExists
 		}
@@ -68,7 +67,7 @@ func (pg Order) CreateWithPayment(ctx context.Context, number int64, username st
 	return err
 }
 
-func (pg Order) GetByStatuses(ctx context.Context, statuses []string) (map[int64]string, error) {
+func (pg Order) GetByStatuses(ctx context.Context, statuses []string) (map[string]string, error) {
 
 	rows, err := pg.db.QueryxContext(ctx, queryOrdersByStatuses, pq.Array(&statuses))
 	if err != nil {
@@ -81,17 +80,17 @@ func (pg Order) GetByStatuses(ctx context.Context, statuses []string) (map[int64
 		}
 	}()
 
-	orders := make(map[int64]string)
+	orders := make(map[string]string)
 
 	for rows.Next() {
-		var orderNum int64
+		var order string
 		var status string
 
-		if err := rows.Scan(&orderNum, &status); err != nil {
+		if err := rows.Scan(&order, &status); err != nil {
 			return nil, err
 		}
 
-		orders[orderNum] = status
+		orders[order] = status
 	}
 
 	if rowsErr := rows.Err(); rowsErr != nil {
@@ -102,13 +101,13 @@ func (pg Order) GetByStatuses(ctx context.Context, statuses []string) (map[int64
 }
 
 // SetStatus - Изменение статуса заказа
-func (pg Order) SetStatus(ctx context.Context, order int64, status string) error {
+func (pg Order) SetStatus(ctx context.Context, order, status string) error {
 
 	_, err := pg.db.ExecContext(ctx, queryUpdateOrder, status, order)
 	return err
 }
 
-func (pg Order) UserOrders(ctx context.Context, username string) ([]market.OrderInfo, error) {
+func (pg Order) UserOrders(ctx context.Context, username string) ([]repository.OrderInfo, error) {
 
 	var userID int64
 	row := pg.db.QueryRowContext(ctx, queryGetUserIDByName, username)
@@ -127,18 +126,16 @@ func (pg Order) UserOrders(ctx context.Context, username string) ([]market.Order
 		}
 	}()
 
-	var infoOrders []market.OrderInfo
+	var infoOrders []repository.OrderInfo
 
 	for rows.Next() {
-		var infoOrder market.OrderInfo
-		var orderNum int64
+		var infoOrder repository.OrderInfo
 
-		errScan := rows.Scan(&orderNum, &infoOrder.Status, &infoOrder.Accrual, &infoOrder.UploadedAt)
+		errScan := rows.Scan(&infoOrder.Order, &infoOrder.Status, &infoOrder.Accrual, &infoOrder.UploadedAt)
 		if errScan != nil {
 			return nil, errScan
 		}
 
-		infoOrder.Order = strconv.FormatInt(orderNum, 10)
 		infoOrder.Accrual = infoOrder.Accrual / 100
 
 		infoOrders = append(infoOrders, infoOrder)

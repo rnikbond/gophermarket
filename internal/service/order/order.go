@@ -1,9 +1,8 @@
-//go:generate mockgen -source variant.go -destination order_mock.go -package order
+//go:generate mockgen -source order.go -destination order_mock.go -package order
 package order
 
 import (
 	"context"
-	"strconv"
 
 	"gophermarket/internal/repository"
 	"gophermarket/pkg"
@@ -13,9 +12,9 @@ import (
 )
 
 type ServiceOrder interface {
-	Create(ctx context.Context, number int64, username string) error
-	CreateWithPayment(ctx context.Context, number int64, username string, sum float64) error
-	UserOrders(ctx context.Context, username string) ([]pkg.OrderInfo, error)
+	Create(ctx context.Context, number, username string) error
+	CreateWithPayment(ctx context.Context, number, username string, sum float64) error
+	UserOrders(ctx context.Context, username string) ([]repository.OrderInfo, error)
 }
 
 type Order struct {
@@ -30,21 +29,21 @@ func NewService(repo *repository.Repository, logger *logpack.LogPack) ServiceOrd
 	}
 }
 
-func (or Order) Create(ctx context.Context, number int64, username string) error {
+func (or Order) Create(ctx context.Context, number, username string) error {
 
-	if ok, err := luhn.IsValid(strconv.FormatInt(number, 10)); !ok || err != nil {
+	if ok, err := luhn.IsValid(number); !ok || err != nil {
 		if err != nil {
 			or.logger.Err.Printf("could not validate order number: %s\n", err)
 		}
 		return pkg.ErrInvalidOrderNumber
 	}
 
-	return or.repo.Order.Create(ctx, number, username, pkg.StatusNew)
+	return or.repo.Order.Create(ctx, number, username, repository.StatusNew)
 }
 
-func (or Order) CreateWithPayment(ctx context.Context, number int64, username string, sum float64) error {
+func (or Order) CreateWithPayment(ctx context.Context, number, username string, sum float64) error {
 
-	if ok, err := luhn.IsValid(strconv.FormatInt(number, 10)); !ok || err != nil {
+	if ok, err := luhn.IsValid(number); !ok || err != nil {
 		if err != nil {
 			or.logger.Err.Printf("could not validate order number: %s\n", err)
 		}
@@ -68,6 +67,6 @@ func (or Order) CreateWithPayment(ctx context.Context, number int64, username st
 	return or.repo.Order.CreateWithPayment(ctx, number, username, sum)
 }
 
-func (or Order) UserOrders(ctx context.Context, username string) ([]pkg.OrderInfo, error) {
+func (or Order) UserOrders(ctx context.Context, username string) ([]repository.OrderInfo, error) {
 	return or.repo.Order.UserOrders(ctx, username)
 }

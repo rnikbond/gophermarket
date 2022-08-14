@@ -6,8 +6,7 @@ package repository
 
 import (
 	context "context"
-	gophermarket "gophermarket/internal"
-	pkg "gophermarket/pkg"
+	internal "gophermarket/internal"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -37,7 +36,7 @@ func (m *MockAuthorization) EXPECT() *MockAuthorizationMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockAuthorization) Create(ctx context.Context, user gophermarket.User) error {
+func (m *MockAuthorization) Create(ctx context.Context, user internal.User) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, user)
 	ret0, _ := ret[0].(error)
@@ -51,7 +50,7 @@ func (mr *MockAuthorizationMockRecorder) Create(ctx, user interface{}) *gomock.C
 }
 
 // ID mocks base method.
-func (m *MockAuthorization) ID(ctx context.Context, user gophermarket.User) (int64, error) {
+func (m *MockAuthorization) ID(ctx context.Context, user internal.User) (int64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ID", ctx, user)
 	ret0, _ := ret[0].(int64)
@@ -89,7 +88,7 @@ func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockOrder) Create(ctx context.Context, number int64, username, status string) error {
+func (m *MockOrder) Create(ctx context.Context, number, username, status string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", ctx, number, username, status)
 	ret0, _ := ret[0].(error)
@@ -103,7 +102,7 @@ func (mr *MockOrderMockRecorder) Create(ctx, number, username, status interface{
 }
 
 // CreateWithPayment mocks base method.
-func (m *MockOrder) CreateWithPayment(ctx context.Context, number int64, username string, sum float64) error {
+func (m *MockOrder) CreateWithPayment(ctx context.Context, number, username string, sum float64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateWithPayment", ctx, number, username, sum)
 	ret0, _ := ret[0].(error)
@@ -117,10 +116,10 @@ func (mr *MockOrderMockRecorder) CreateWithPayment(ctx, number, username, sum in
 }
 
 // GetByStatuses mocks base method.
-func (m *MockOrder) GetByStatuses(ctx context.Context, statuses []string) (map[int64]string, error) {
+func (m *MockOrder) GetByStatuses(ctx context.Context, statuses []string) (map[string]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByStatuses", ctx, statuses)
-	ret0, _ := ret[0].(map[int64]string)
+	ret0, _ := ret[0].(map[string]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -132,7 +131,7 @@ func (mr *MockOrderMockRecorder) GetByStatuses(ctx, statuses interface{}) *gomoc
 }
 
 // SetStatus mocks base method.
-func (m *MockOrder) SetStatus(ctx context.Context, order int64, status string) error {
+func (m *MockOrder) SetStatus(ctx context.Context, order, status string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetStatus", ctx, order, status)
 	ret0, _ := ret[0].(error)
@@ -146,10 +145,10 @@ func (mr *MockOrderMockRecorder) SetStatus(ctx, order, status interface{}) *gomo
 }
 
 // UserOrders mocks base method.
-func (m *MockOrder) UserOrders(ctx context.Context, username string) ([]pkg.OrderInfo, error) {
+func (m *MockOrder) UserOrders(ctx context.Context, username string) ([]OrderInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UserOrders", ctx, username)
-	ret0, _ := ret[0].([]pkg.OrderInfo)
+	ret0, _ := ret[0].([]OrderInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -214,10 +213,10 @@ func (mr *MockLoyaltyMockRecorder) HowMatchUsed(ctx, username interface{}) *gomo
 }
 
 // Payments mocks base method.
-func (m *MockLoyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
+func (m *MockLoyalty) Payments(ctx context.Context, username string) ([]PaymentInfo, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Payments", ctx, username)
-	ret0, _ := ret[0].([]pkg.PaymentInfo)
+	ret0, _ := ret[0].([]PaymentInfo)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -229,7 +228,7 @@ func (mr *MockLoyaltyMockRecorder) Payments(ctx, username interface{}) *gomock.C
 }
 
 // SetAccrual mocks base method.
-func (m *MockLoyalty) SetAccrual(ctx context.Context, order int64, accrual float64) error {
+func (m *MockLoyalty) SetAccrual(ctx context.Context, order string, accrual float64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetAccrual", ctx, order, accrual)
 	ret0, _ := ret[0].(error)

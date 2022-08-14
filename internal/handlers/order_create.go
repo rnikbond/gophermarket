@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strconv"
 
+	"gophermarket/internal/repository"
 	market "gophermarket/pkg"
 )
 
@@ -29,19 +29,13 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	data, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	order, err := io.ReadAll(r.Body)
+	if len(order) == 0 || err != nil {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	order, err := strconv.ParseInt(string(data), 10, 64)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	errOrder := h.services.Order.Create(r.Context(), order, username)
+	errOrder := h.services.Order.Create(r.Context(), string(order), username)
 	if errOrder == nil {
 		w.WriteHeader(http.StatusAccepted)
 		return
@@ -79,19 +73,13 @@ func (h *Handler) CreateWithPay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var orderPay market.OrderWithPay
+	var orderPay repository.OrderWithPay
 
 	if err := json.Unmarshal(data, &orderPay); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
-	orderNum, errParse := strconv.ParseInt(orderPay.Order, 10, 64)
-	if errParse != nil {
-		http.Error(w, errParse.Error(), http.StatusBadRequest)
-		return
-	}
-
-	errCreate := h.services.Order.CreateWithPayment(r.Context(), orderNum, username, orderPay.Sum)
+	errCreate := h.services.Order.CreateWithPayment(r.Context(), orderPay.Order, username, orderPay.Sum)
 	if errCreate != nil {
 		http.Error(w, errCreate.Error(), market.ErrorHTTP(errCreate))
 		return

@@ -29,7 +29,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 		ctx         context.Context
 		contentType string
 		username    string
-		orderNum    int64
+		orderNum    string
 		body        io.Reader
 		userService bool
 	}
@@ -50,7 +50,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 				ctx:         context.Background(),
 				contentType: "text/plain",
 				username:    "user_test",
-				orderNum:    417147,
+				orderNum:    "417147",
 				body:        bytes.NewReader([]byte("417147")),
 				userService: true,
 			},
@@ -65,7 +65,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 				ctx:         context.Background(),
 				contentType: "text/plain",
 				username:    "user_test",
-				orderNum:    111000111,
+				orderNum:    "111000111",
 				body:        bytes.NewReader([]byte("111000111")),
 				userService: true,
 			},
@@ -79,7 +79,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 			args: args{
 				ctx:         context.Background(),
 				username:    "user_test",
-				orderNum:    111000111,
+				orderNum:    "111000111",
 				body:        bytes.NewReader([]byte("111000111")),
 				userService: false,
 			},
@@ -93,7 +93,7 @@ func TestHandler_CreateOrder(t *testing.T) {
 				ctx:         context.Background(),
 				contentType: "text/plain",
 				username:    "user_test",
-				orderNum:    111000111,
+				orderNum:    "111000111",
 				body:        nil,
 				userService: false,
 			},

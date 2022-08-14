@@ -1,4 +1,4 @@
-package gophermarket
+package market
 
 import (
 	"context"

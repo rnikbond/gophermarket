@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"gophermarket/internal/repository"
 	"gophermarket/internal/service"
 	"gophermarket/internal/service/order"
-	"gophermarket/pkg"
 	"gophermarket/pkg/logpack"
 
 	"github.com/golang/mock/gomock"
@@ -22,8 +22,7 @@ import (
 func TestHandler_OrdersList(t *testing.T) {
 
 	const (
-		tokenKey   = "PaintTheTownRed"
-		timeLayout = "2006-01-02T15:04:05Z07:00"
+		tokenKey = "PaintTheTownRed"
 	)
 
 	ctrl := gomock.NewController(t)
@@ -36,7 +35,7 @@ func TestHandler_OrdersList(t *testing.T) {
 	}
 
 	type want struct {
-		orders     []pkg.OrderInfo
+		orders     []repository.OrderInfo
 		status     int
 		errService error
 	}
@@ -54,17 +53,17 @@ func TestHandler_OrdersList(t *testing.T) {
 				userService: true,
 			},
 			want: want{
-				orders: []pkg.OrderInfo{
+				orders: []repository.OrderInfo{
 					{
 						Order:      "417147",
-						Status:     pkg.StatusProcessed,
+						Status:     repository.StatusProcessed,
 						Accrual:    50.65,
-						UploadedAt: time.Now().Format(timeLayout),
+						UploadedAt: time.Now().Format(time.RFC3339),
 					},
 					{
 						Order:      "951913",
-						Status:     pkg.StatusProcessed,
-						UploadedAt: time.Now().Format(timeLayout),
+						Status:     repository.StatusProcessed,
+						UploadedAt: time.Now().Format(time.RFC3339),
 					},
 				},
 				status:     http.StatusOK,
@@ -79,7 +78,7 @@ func TestHandler_OrdersList(t *testing.T) {
 				userService: true,
 			},
 			want: want{
-				orders:     []pkg.OrderInfo{},
+				orders:     []repository.OrderInfo{},
 				status:     http.StatusNoContent,
 				errService: nil,
 			},
@@ -119,7 +118,7 @@ func TestHandler_OrdersList(t *testing.T) {
 
 			require.NoError(t, errRead)
 
-			var orders []pkg.OrderInfo
+			var orders []repository.OrderInfo
 			errJSON := json.Unmarshal(data, &orders)
 			require.NoError(t, errJSON)
 

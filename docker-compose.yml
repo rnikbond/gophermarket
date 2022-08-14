@@ -1,0 +1,31 @@
+services:
+  database:
+    image: postgres:14.5
+    restart: always
+    environment:
+        - POSTGRES_USER=user
+        - POSTGRES_PASSWORD=0582
+        - POSTGRES_DB=gophermarket_db
+        - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+        - 5432:5432
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+        - ADDRESS=127.0.0.0:8080
+        - DATABASE_URI=host=database port=5432 user=user password=0582 dbname=gophermarket_db sslmode=disable
+        - ACCRUAL_SYSTEM_ADDRESS=http://127.0.0.1:8000
+    networks:
+        - default
+    ports:
+        - 8080:8080
+        - 8000:8000
+    links:
+        - database
+    depends_on:
+        - database
+    
+   
+  

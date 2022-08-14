@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	gophermarket "gophermarket/internal"
 	"gophermarket/internal/repository"
 	"gophermarket/pkg/logpack"
 
@@ -26,7 +25,7 @@ func TestLoyalty_Balance(t *testing.T) {
 	}
 
 	type want struct {
-		balance gophermarket.Balance
+		balance Balance
 		err     error
 	}
 
@@ -42,7 +41,7 @@ func TestLoyalty_Balance(t *testing.T) {
 				username: "user_test",
 			},
 			want: want{
-				balance: gophermarket.Balance{
+				balance: Balance{
 					Accrual:   123.23,
 					Withdrawn: 0,
 				},

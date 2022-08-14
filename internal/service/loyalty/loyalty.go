@@ -5,23 +5,26 @@ import (
 	"context"
 	"math"
 
-	gophermarket "gophermarket/internal"
 	"gophermarket/internal/repository"
-	"gophermarket/pkg"
 	"gophermarket/pkg/logpack"
 )
 
 type ServiceLoyalty interface {
 	HowMatchAvailable(ctx context.Context, username string) (float64, error)
 	HowMatchUsed(ctx context.Context, username string) (float64, error)
-	SetAccrual(ctx context.Context, order int64, accrual float64) error
-	Balance(ctx context.Context, username string) (gophermarket.Balance, error)
-	Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error)
+	SetAccrual(ctx context.Context, order string, accrual float64) error
+	Balance(ctx context.Context, username string) (Balance, error)
+	Payments(ctx context.Context, username string) ([]repository.PaymentInfo, error)
 }
 
 type Loyalty struct {
 	logger *logpack.LogPack
 	repo   *repository.Repository
+}
+
+type Balance struct {
+	Accrual   float64 `json:"current"`
+	Withdrawn float64 `json:"withdrawn"`
 }
 
 func NewService(repo *repository.Repository, logger *logpack.LogPack) ServiceLoyalty {
@@ -41,21 +44,21 @@ func (service Loyalty) HowMatchUsed(ctx context.Context, username string) (float
 	return service.repo.Loyalty.HowMatchUsed(ctx, username)
 }
 
-func (service Loyalty) SetAccrual(ctx context.Context, order int64, accrual float64) error {
+func (service Loyalty) SetAccrual(ctx context.Context, order string, accrual float64) error {
 
 	return service.repo.Loyalty.SetAccrual(ctx, order, accrual)
 }
 
-func (service Loyalty) Balance(ctx context.Context, username string) (gophermarket.Balance, error) {
+func (service Loyalty) Balance(ctx context.Context, username string) (Balance, error) {
 
 	current, err := service.HowMatchAvailable(ctx, username)
 	if err != nil {
-		return gophermarket.Balance{}, err
+		return Balance{}, err
 	}
 
 	used, err := service.HowMatchUsed(ctx, username)
 	if err != nil {
-		return gophermarket.Balance{}, err
+		return Balance{}, err
 	}
 
 	round := func(val float64, precision uint) float64 {
@@ -65,12 +68,12 @@ func (service Loyalty) Balance(ctx context.Context, username string) (gophermark
 
 	current = round(current-used, 2)
 
-	return gophermarket.Balance{
+	return Balance{
 		Accrual:   current,
 		Withdrawn: used,
 	}, nil
 }
 
-func (service Loyalty) Payments(ctx context.Context, username string) ([]pkg.PaymentInfo, error) {
+func (service Loyalty) Payments(ctx context.Context, username string) ([]repository.PaymentInfo, error) {
 	return service.repo.Loyalty.Payments(ctx, username)
 }
